@@ -1,4 +1,4 @@
-#pragma config(Sensor, dgt11,    limitSwitch,  sensorTouch)
+#pragma config(Sensor, dgtl1,    limitSwitch,  sensorTouch)
 #pragma config(Motor,  port2,           frontRight,    tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           backRight,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           frontLeft,     tmotorVex393_MC29, openLoop)
