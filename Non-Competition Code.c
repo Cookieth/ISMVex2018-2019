@@ -1,4 +1,4 @@
-#pragma config(Sensor, in1,    potentiometer,  sensorPotentiometer)
+#pragma config(Sensor, dgt11,    limitSwitch,  sensorTouch)
 #pragma config(Motor,  port2,           frontRight,    tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           backRight,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           frontLeft,     tmotorVex393_MC29, openLoop)
@@ -16,30 +16,43 @@ task main() {
     motor[backRight] = vexRT[Ch2];
     motor[frontLeft] = vexRT[Ch3];
     motor[backLeft] = vexRT[Ch3];
+
     if(vexRT[Btn6U]==1) {
-    	motor[frontLauncher] = 127;
-    	motor[backLauncher] = 127;
+       motor[frontLauncher] = 127;
+       motor[backLauncher] = 127;
     }
     else if(vexRT[Btn6D] == 1) {
-    	while(SensorValue[potentiometer] < 550 || SensorValue[potentiometer] > 600) {
-	    	motor[frontLauncher] = 70;
-	    	motor[backLauncher] = 70;
-	    }
+       while(SensorValue[limitSwitch] != 1) {
+          motor[frontLauncher] = 70;
+          motor[backLauncher] = 70;
+       }
+       motor[frontLauncher] = 0;
+        motor[backLauncher] = 0;
     }
     else {
-	    motor[frontLauncher] = 0;
-	    motor[backLauncher] = 0;
+       motor[frontLauncher] = 0;
+       motor[backLauncher] = 0;
     }
 
     if(vexRT[Btn5D] == 1) {
-    	motor[intake] = 127;
+       motor[intake] = 127;
     }
     else if(vexRT[Btn5U] == 1) {
 
-    	motor[intake] = -127;
+       motor[intake] = -127;
     }
     else {
-    	motor[intake] = 0;
+       motor[intake] = 0;
+    }
+
+    if(vexRT[Btn8D] == 1) {
+        motor[claw] = 70;
+    }
+    else if(vexRT[Btn8U] == 1) {
+        motor[claw] = -70;
+    }
+    else {
+        motor[claw] = 0;
     }
   }
 }
