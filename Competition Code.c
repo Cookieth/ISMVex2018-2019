@@ -96,7 +96,7 @@ task usercontrol()
        motor[backMangonel] = 100;
       }
       else if(vexRT[Btn6D] == 1) {
-       while(SensorValue[limitSwitch] != 1) {
+       if(SensorValue[limitSwitch] != 1) {
           motor[frontMangonel] = 80;
           motor[backMangonel] = 80;
        }
