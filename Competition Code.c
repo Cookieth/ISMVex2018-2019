@@ -89,13 +89,14 @@ task autonomous()
 
 task usercontrol()
 {
+	int driveGear = 1;
   // User control code here, inside the loop
   while (true)
     {
-      motor[frontRight] = vexRT[Ch2];
-      motor[backRight] = vexRT[Ch2];
-      motor[frontLeft] = vexRT[Ch3];
-      motor[backLeft] = vexRT[Ch3];
+      motor[frontRight] = (vexRT[Ch2])/driveGear;
+      motor[backRight] = (vexRT[Ch2])/driveGear;
+      motor[frontLeft] = (vexRT[Ch3])/driveGear;
+      motor[backLeft] = (vexRT[Ch3])/driveGear;
   
       if(vexRT[Btn6U]==1) {
        motor[frontMangonel] = 100;
@@ -106,25 +107,39 @@ task usercontrol()
           motor[frontMangonel] = 80;
           motor[backMangonel] = 80;
        }
-       motor[frontMangonel] = 0;
-        motor[backMangonel] = 0;
       }
       else {
        motor[frontMangonel] = 0;
        motor[backMangonel] = 0;
       }
   
-      if(vexRT[Btn5D] == 1) {
+      if(vexRT[Btn7L] == 1) {
        motor[intake] = 127;
+       wait1Msec(0090);
+       motor[intake] = 0;
+       wait1Msec(0500);
       }
-      else if(vexRT[Btn5U] == 1) {
-  
+      else if(vexRT[Btn7R] == 1) {
        motor[intake] = -127;
+       wait1Msec(0090);
+       motor[intake] = 0;
+       wait1Msec(0500);
+      }
+      else {
+       motor[intake] = 0;
+      }
+      
+      if(vexRT[Btn5U] == 1) {
+       motor[intake] = 40;
+      }
+      else if(vexRT[Btn5D] == 1) {
+       motor[intake] = -40;
       }
       else {
        motor[intake] = 0;
       }
   
+      //=====RIGHT SIDE OF THE REMOTE=====
       if(vexRT[Btn8D] == 1) {
           motor[claw] = 100;
       }
@@ -134,5 +149,14 @@ task usercontrol()
       else {
           motor[claw] = 0;
       }
+      
+      if(vexRT[Btn8R] == 1) {
+      	driveGear += 1;
+      	wait1Msec(0500);
+    	}
+    	else if((vexRT[Btn8L] == 1)&&(driveGear > 1)){
+    		driveGear -= 1;
+    		wait1Msec(0500);
+    	}
     }
 }
