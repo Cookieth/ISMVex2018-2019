@@ -63,10 +63,16 @@ void pre_auton()
 
 task autonomous()
 {
-  while(SensorValue[limitSwitch] != 1) {
-    motor[frontMangonel] = 80;
-    motor[backMangonel] = 80;
-  }
+  //while(SensorValue[limitSwitch] != 1) {
+    //motor[frontMangonel] = 80;
+    //motor[backMangonel] = 80;
+  //}
+  motor[backLeft] = -127;
+  motor[backRight] = -127;
+  wait1Msec(2000);
+  motor[backLeft] = 0;
+  motor[backRight] = 0;
+  
   motor[frontMangonel] = 0;
   motor[backMangonel] = 0;
 }
