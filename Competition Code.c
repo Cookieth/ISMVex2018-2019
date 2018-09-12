@@ -67,11 +67,21 @@ task autonomous()
     //motor[frontMangonel] = 80;
     //motor[backMangonel] = 80;
   //}
+  motor[backLeft] = 127;
+  motor[backRight] = 127;
+  wait1Msec(2000);
   motor[backLeft] = -127;
   motor[backRight] = -127;
+  wait1Msec(1000);
+  motor[backLeft] = 127;
+  motor[backRight] = 0;
+  wait1Msec(1000);
+  motor[backLeft] = 127;
+  motor[backRight] = 127;
   wait1Msec(2000);
   motor[backLeft] = 0;
   motor[backRight] = 0;
+  wait1Msec(2000);
   
   motor[frontMangonel] = 0;
   motor[backMangonel] = 0;
