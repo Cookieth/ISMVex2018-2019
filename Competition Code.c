@@ -100,19 +100,31 @@ task autonomous()
 task usercontrol()
 {
 	int driveGear = 1;
+	int direction = 1;
   // User control code here, inside the loop
   while (true)
     {
-      motor[frontRight] = (vexRT[Ch2])/driveGear;
-      motor[backRight] = (vexRT[Ch2])/driveGear;
-      motor[frontLeft] = (vexRT[Ch3])/driveGear;
-      motor[backLeft] = (vexRT[Ch3])/driveGear;
-  
-      if(vexRT[Btn6U]==1) {
+    	int trueCh2 = (vexRT[Ch2]*direction)/driveGear;
+    	int trueCh3 = (vexRT[Ch3]*direction)/driveGear;
+    	
+    	if(direction == 1){
+      	motor[frontRight] = trueCh2;
+      	motor[backRight] = trueCh2;
+      	motor[frontLeft] = trueCh3;
+      	motor[backLeft] = trueCh3;
+  		}
+  		else{
+  			motor[frontRight] = trueCh3;
+      	motor[backRight] = trueCh3;
+      	motor[frontLeft] = trueCh2;
+      	motor[backLeft] = trueCh2;
+  		}
+  		
+      if(vexRT[Btn8U]==1) {
        motor[frontMangonel] = 100;
        motor[backMangonel] = 100;
       }
-      else if(vexRT[Btn6D] == 1) {
+      else if(vexRT[Btn8D] == 1) {
        if(SensorValue[limitSwitch] != 1) {
           motor[frontMangonel] = 80;
           motor[backMangonel] = 80;
@@ -125,13 +137,13 @@ task usercontrol()
   
       if(vexRT[Btn7L] == 1) {
        motor[intake] = 127;
-       wait1Msec(0090);
+       wait1Msec(0310);
        motor[intake] = 0;
        wait1Msec(0500);
       }
       else if(vexRT[Btn7R] == 1) {
        motor[intake] = -127;
-       wait1Msec(0090);
+       wait1Msec(0310);
        motor[intake] = 0;
        wait1Msec(0500);
       }
@@ -139,21 +151,26 @@ task usercontrol()
        motor[intake] = 0;
       }
       
+      if(vexRT[Btn7U] == 1) {
+       direction = direction * -1;
+       wait1Msec(0500);
+      }
+      
       if(vexRT[Btn5U] == 1) {
-       motor[intake] = 40;
+       motor[intake] = 20; //ADJUSTABLE
       }
       else if(vexRT[Btn5D] == 1) {
-       motor[intake] = -40;
+       motor[intake] = -20; //ADJUSTABLE
       }
       else {
        motor[intake] = 0;
       }
   
       //=====RIGHT SIDE OF THE REMOTE=====
-      if(vexRT[Btn8D] == 1) {
+      if(vexRT[Btn6D] == 1) {
           motor[claw] = 100;
       }
-      else if(vexRT[Btn8U] == 1) {
+      else if(vexRT[Btn6U] == 1) {
           motor[claw] = -100;
       }
       else {
