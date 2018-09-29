@@ -27,10 +27,7 @@ task autonomous()
 	basicAutonomous();
 }
 
-task usercontrol()
-{
-	int driveGear = 1;
-	int direction = 1;
+
 
 //---------------------------------------------------------------------------------------------------------------
 //
@@ -84,11 +81,18 @@ task usercontrol()
 // Ch3Xmtr2
 // Ch4Xmtr2
 //---------------------------------------------------------------------------------------------------------------
-  while (true)
-    {
+task usercontrol()
+{
+	int driveGear = 1;
+	int direction = 1;
+	while (true){
+			
+    	//BASE CONROL
     	int trueCh2 = (vexRT[Ch2]*direction)/driveGear;
     	int trueCh3 = (vexRT[Ch3]*direction)/driveGear;
 
+    	//=======================LEFT HAND SIDE===================
+    	
     	if(direction == 1){
       	motor[right] = trueCh2;
       	motor[left] = trueCh3;
@@ -97,22 +101,7 @@ task usercontrol()
   			motor[right] = trueCh3;
       	motor[left] = trueCh2;
   		}
-
-      if(vexRT[Btn8U]==1) {
-       motor[frontMangonel] = 127;
-       motor[backMangonel] = 127;
-      }
-      else if(vexRT[Btn8D] == 1) {
-       if(SensorValue[limitSwitch] != 1) {
-          motor[frontMangonel] = 127;
-          motor[backMangonel] = 127;
-       }
-      }
-      else {
-       motor[frontMangonel] = 0;
-       motor[backMangonel] = 0;
-      }
-
+			
       if(vexRT[Btn5U]==1) {
       	motor[arm] = 127;
       }
@@ -122,48 +111,64 @@ task usercontrol()
       else {
        motor[arm] = 0;
       }
-
-      //===========================================
-      //					RIGHT SIDE OF THE REMOTE
-      //===========================================
-
-      if(vexRT[Btn7U] == 1) {
+      
+			if(vexRT[Btn7U] == 1) {
        direction = direction * -1;
        wait1Msec(0500);
       }
-
-      if(vexRT[Btn6U] == 1) {
-       motor[intake] = 127; //ADJUSTABLE
-      }
-      else if(vexRT[Btn6D] == 1) {
-       motor[intake] = -127; //ADJUSTABLE
-      }
-      else {
-       motor[intake] = 0;
-      }
-
-      //===========================================
-      //					RIGHT SIDE OF THE REMOTE
-      //===========================================
+      
       if(vexRT[Btn7L] == 1) {
-          motor[claw] = 100;
+          motor[claw] = 40;
       }
       else if(vexRT[Btn7R] == 1) {
-          motor[claw] = -100;
+          motor[claw] = -40;
       }
       else {
           motor[claw] = 0;
-      }
-
-      if(vexRT[Btn8R] == 1) {
-      	driveGear += 1;
-      	wait1Msec(0500);
-    	}
-    	else if((vexRT[Btn8L] == 1)&&(driveGear > 1)){
-    		driveGear -= 1;
-    		wait1Msec(0500);
-    	}
-    }
+     	}
+      
+      //=======================RIGHT HAND SIDE===================
+     	
+			if(vexRT[Btn6U] == 1) {
+				motor[intake] = 127; //ADJUSTABLE
+				if(SensorValue[limitSwitch] != 1) {
+      		motor[frontMangonel] = 127;
+					motor[backMangonel] = 127;
+				}
+				else {
+					motor[frontMangonel] = 0;
+					motor[backMangonel] = 0;
+				}
+			}
+			else if(vexRT[Btn6D] == 1) {
+				motor[intake] = -127; //ADJUSTABLE
+			}
+			else {
+				motor[intake] = 0;
+			}
+     	
+  		//MANGONEL CONTROL
+			if(vexRT[Btn8U]==1) {
+				motor[frontMangonel] = 127;
+				motor[backMangonel] = 127;
+		}
+		else if(vexRT[Btn8D] == 1 && SensorValue[limitSwitch] != 1) {
+      motor[frontMangonel] = 127;
+			motor[backMangonel] = 127;
+		}
+    else {
+			motor[frontMangonel] = 0;
+			motor[backMangonel] = 0;
+		}
+		if(vexRT[Btn8R] == 1) {
+			driveGear += 1;
+			wait1Msec(0500);
+		}
+		else if((vexRT[Btn8L] == 1)&&(driveGear > 1)){
+			driveGear -= 1;
+			wait1Msec(0500);
+		}
+	} //end of while loop
 }
 
 //---------------------------------------------------------------------------------------------------------------
