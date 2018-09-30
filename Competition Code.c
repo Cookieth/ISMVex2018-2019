@@ -39,134 +39,141 @@ task autonomous()
 //---------------------------
 // Controller 1
 //---------------------------
-// AccelX
-// AccelY
-// AccelZ
-// Btn5U: Claw --> Arm
-// Btn5D: Claw --> Arm
+// AccelX:
+// AccelY:
+// AccelZ:
+// Btn5U: Mangonel
+// Btn5D: Mangonel
 // Btn6U: Intake
 // Btn6D: Intake
-// Btn7U: Switch Direction
-// Btn7D
-// Btn7L: Claw
-// Btn7R: Claw
-// Btn8U: Mangonel
-// Btn8D: Mangonel
+// Btn7U:
+// Btn7D: Switch Controller
+// Btn7L:
+// Btn7R:
+// Btn8U:
+// Btn8D: Switch Direction
 // Btn8L: Change "Gear"
 // Btn8R: Change "Gear"
-// Ch1
+// Ch1:
 // Ch2: Right-Side Base Motors
 // Ch3: Left-Side Base Motors
-// Ch4
+// Ch4:
 //---------------------------
 // Controller 2
 //---------------------------
-// AccelXXmtr2
-// AccelYXmtr2
-// AccelZXmtr2
-// Btn5UXmtr2
-// Btn5DXmtr2
-// Btn6UXmtr2
-// Btn6DXmtr2
-// Btn7UXmtr2
-// Btn7DXmtr2
-// Btn7LXmtr2
-// Btn7RXmtr2
-// Btn8UXmtr2
-// Btn8DXmtr2
-// Btn8LXmtr2
-// Btn8RXmtr2
-// Ch1Xmtr2
-// Ch2Xmtr2
-// Ch3Xmtr2
-// Ch4Xmtr2
+// AccelXXmtr2:
+// AccelYXmtr2:
+// AccelZXmtr2:
+// Btn5UXmtr2: Claw --> Arm
+// Btn5DXmtr2: Claw --> Arm
+// Btn6UXmtr2:
+// Btn6DXmtr2:
+// Btn7UXmtr2:
+// Btn7DXmtr2: Switch Controller
+// Btn7LXmtr2: Claw
+// Btn7RXmtr2: Claw
+// Btn8UXmtr2:
+// Btn8DXmtr2: Switch Direction
+// Btn8LXmtr2: Change "Gear"
+// Btn8RXmtr2: Change "Gear"
+// Ch1Xmtr2:
+// Ch2Xmtr2: Right-Side Base Motors
+// Ch3Xmtr2: Left-Side Base Motors
+// Ch4Xmtr2:
 //---------------------------------------------------------------------------------------------------------------
 task usercontrol()
 {
 	int driveGear = 1;
 	int direction = 1;
+	int driveController = 1;
+	int trueCh2;
+    	int trueCh3;
 	while (true){
 			
-    	//BASE CONROL
-    	int trueCh2 = (vexRT[Ch2]*direction)/driveGear;
-    	int trueCh3 = (vexRT[Ch3]*direction)/driveGear;
+		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
+		if(driveController == 1) {
+			trueCh2 = (vexRT[Ch2]*direction)/driveGear;
+			trueCh3 = (vexRT[Ch3]*direction)/driveGear;
+		}
+		else {
+			trueCh2 = (vexRT[Ch2Xmtr2]*direction)/driveGear;
+			trueCh3 = (vexRT[Ch3Xmtr2]*direction)/driveGear;
+		}
 
-    	//=======================LEFT HAND SIDE===================
-    	
-    	if(direction == 1){
-      	motor[right] = trueCh2;
-      	motor[left] = trueCh3;
-  		}
-  		else{
-  			motor[right] = trueCh3;
-      	motor[left] = trueCh2;
-  		}
-			
-      if(vexRT[Btn5U]==1) {
-      	motor[arm] = 127;
-      }
-      else if(vexRT[Btn5D] == 1) {
-      	motor[arm] = -127;
-      }
-      else {
-       motor[arm] = 0;
-      }
-      
-			if(vexRT[Btn7U] == 1) {
-       direction = direction * -1;
-       wait1Msec(0500);
-      }
-      
-      if(vexRT[Btn7L] == 1) {
-          motor[claw] = 40;
-      }
-      else if(vexRT[Btn7R] == 1) {
-          motor[claw] = -40;
-      }
-      else {
-          motor[claw] = 0;
-     	}
-      
-      //=======================RIGHT HAND SIDE===================
-     	
-			if(vexRT[Btn6U] == 1) {
-				motor[intake] = 127; //ADJUSTABLE
-				if(SensorValue[limitSwitch] != 1) {
-      		motor[frontMangonel] = 127;
-					motor[backMangonel] = 127;
-				}
-				else {
-					motor[frontMangonel] = 0;
-					motor[backMangonel] = 0;
-				}
-			}
-			else if(vexRT[Btn6D] == 1) {
-				motor[intake] = -127; //ADJUSTABLE
-			}
-			else {
-				motor[intake] = 0;
-			}
-     	
-  		//MANGONEL CONTROL
-			if(vexRT[Btn8U]==1) {
-				motor[frontMangonel] = 127;
-				motor[backMangonel] = 127;
+		if(((vexRT[Btn8D] == 1) && (driveController == 1))|| ((vexRT[Btn8DXmtr2] == 1) && (driveController == -1))) {
+			direction = direction * -1;
+			wait1Msec(0500);
 		}
-		else if(vexRT[Btn8D] == 1 && SensorValue[limitSwitch] != 1) {
-      motor[frontMangonel] = 127;
-			motor[backMangonel] = 127;
+		if(((vexRT[Btn7D] == 1) && (driveController == 1)) || ((vexRT[Btn7DXmtr2] == 1) && (driveController == -1))) {
+			driveController = driveController * -1;
+			wait1Msec(0500);
 		}
-    else {
-			motor[frontMangonel] = 0;
-			motor[backMangonel] = 0;
-		}
-		if(vexRT[Btn8R] == 1) {
+
+		if(((vexRT[Btn8R] == 1) && (driveController == 1)) || ((vexRT[Btn8RXmtr2] == 1) && (driveController == -1))) {
 			driveGear += 1;
 			wait1Msec(0500);
 		}
-		else if((vexRT[Btn8L] == 1)&&(driveGear > 1)){
+		else if(((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1))&&(driveGear > 1)){
 			driveGear -= 1;
 			wait1Msec(0500);
+		}
+
+		motor[right] = trueCh2;
+		motor[left] = trueCh3;
+
+		//=======================ARM CONTROL (PARTNER JOYSTICK)===================
+
+		if(vexRT[Btn5UXmtr2]==1) {
+			motor[arm] = 127;
+		}
+		else if(vexRT[Btn5DXmtr2] == 1) {
+			motor[arm] = -127;
+		}
+		else {
+			motor[arm] = 0;
+		}
+
+		if(vexRT[Btn7LXmtr2] == 1) {
+			motor[claw] = 40;
+		}
+		else if(vexRT[Btn7RXmtr2] == 1) {
+			motor[claw] = -40;
+		}
+		else {
+			motor[claw] = 0;
+		}
+
+	      	//=======================MANGONEL CONTROL (MAIN JOYSTICK)===================
+
+		if(vexRT[Btn6U] == 1) {
+			motor[intake] = 127; //ADJUSTABLE
+			if(SensorValue[limitSwitch] != 1) {
+				motor[frontMangonel] = 127;
+				motor[backMangonel] = 127;
+			}
+			else {
+				motor[frontMangonel] = 0;
+				motor[backMangonel] = 0;
+			}
+		}
+		else if(vexRT[Btn6D] == 1) {
+			motor[intake] = -127; //ADJUSTABLE
+		}
+		else {
+			motor[intake] = 0;
+		}
+
+		if(vexRT[Btn5U]==1) {
+			motor[frontMangonel] = 127;
+			motor[backMangonel] = 127;
+		}
+		else if(vexRT[Btn5D] == 1 && SensorValue[limitSwitch] != 1) {
+			motor[frontMangonel] = 127;
+			motor[backMangonel] = 127;
+		}
+		else {
+			motor[frontMangonel] = 0;
+			motor[backMangonel] = 0;
 		}
 	} //end of while loop
 }
