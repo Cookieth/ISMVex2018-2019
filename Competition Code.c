@@ -100,7 +100,7 @@ task usercontrol()
 			trueCh3 = (vexRT[Ch3Xmtr2]*direction)/driveGear;
 		}
 
-		if(((vexRT[Btn8D] == 1) && (driveController == 1))|| ((vexRT[Btn8DXmtr2] == 1) && (driveController == -1))) {
+		if((vexRT[Btn8D] == 1)|| (vexRT[Btn8DXmtr2] == 1)) {
 			direction = direction * -1;
 			wait1Msec(0500);
 		}
