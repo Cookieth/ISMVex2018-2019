@@ -64,10 +64,10 @@ task autonomous()
 // AccelXXmtr2:
 // AccelYXmtr2:
 // AccelZXmtr2:
-// Btn5UXmtr2: Claw --> Arm
+// Btn5UXmtr2:
+// Btn5DXmtr2:
+// Btn6UXmtr2: Claw --> Arm
 // Btn5DXmtr2: Claw --> Arm
-// Btn6UXmtr2:
-// Btn6DXmtr2:
 // Btn7UXmtr2:
 // Btn7DXmtr2: Switch Controller
 // Btn7LXmtr2: Claw
@@ -91,20 +91,28 @@ task usercontrol()
 	while (true){
 			
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
-		if(driveController == 1) {
-			trueCh2 = (vexRT[Ch2]*direction)/driveGear;
-			trueCh3 = (vexRT[Ch3]*direction)/driveGear;
+		if(driveController == 1 && direction == 1) {
+			trueCh2 = (vexRT[Ch2])/driveGear;
+			trueCh3 = (vexRT[Ch3])/driveGear;
 		}
-		else {
-			trueCh2 = (vexRT[Ch2Xmtr2]*direction)/driveGear;
-			trueCh3 = (vexRT[Ch3Xmtr2]*direction)/driveGear;
+		else if(driveController == 1 && direction == -1){
+			trueCh2 = (vexRT[Ch3]*direction)/driveGear;
+			trueCh3 = (vexRT[Ch2]*direction)/driveGear;
+		}
+		else if(driveController == -1 && direction == 1){
+			trueCh2 = (vexRT[Ch2Xmtr2]/driveGear);
+			trueCh3 = (vexRT[Ch3Xmtr2]/driveGear);
+		}
+		else if(driveController == -1 && direction == -1){
+			trueCh2 = (vexRT[Ch3Xmtr2]*direction)/driveGear;
+			trueCh3 = (vexRT[Ch2Xmtr2]*direction)/driveGear;
 		}
 
 		if((vexRT[Btn8D] == 1)|| (vexRT[Btn8DXmtr2] == 1)) {
 			direction = direction * -1;
 			wait1Msec(0500);
 		}
-		if(((vexRT[Btn7D] == 1) && (driveController == 1)) || ((vexRT[Btn7DXmtr2] == 1) && (driveController == -1))) {
+		if((vexRT[Btn7D] == 1) || (vexRT[Btn7DXmtr2] == 1)) {
 			driveController = driveController * -1;
 			wait1Msec(0500);
 		}
@@ -123,10 +131,10 @@ task usercontrol()
 
 		//=======================ARM CONTROL (PARTNER JOYSTICK)===================
 
-		if(vexRT[Btn5UXmtr2]==1) {
+		if(vexRT[Btn6UXmtr2]==1) {
 			motor[arm] = 127;
 		}
-		else if(vexRT[Btn5DXmtr2] == 1) {
+		else if(vexRT[Btn6DXmtr2] == 1) {
 			motor[arm] = -127;
 		}
 		else {
@@ -210,4 +218,4 @@ void basicAutonomous(){
 
 void nAutonomous(){
 
-}
+} 
