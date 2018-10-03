@@ -24,7 +24,7 @@ void pre_auton()
 
 task autonomous()
 {
-	basicAutonomous();
+	nAutonomous();
 }
 
 
@@ -46,7 +46,7 @@ task autonomous()
 // Btn5D: Mangonel
 // Btn6U: Intake
 // Btn6D: Intake
-// Btn7U:
+// Btn7U: Auton Tester
 // Btn7D: Switch Controller
 // Btn7L:
 // Btn7R:
@@ -68,7 +68,7 @@ task autonomous()
 // Btn5DXmtr2:
 // Btn6UXmtr2: Claw --> Arm
 // Btn5DXmtr2: Claw --> Arm
-// Btn7UXmtr2:
+// Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
 // Btn7LXmtr2: Claw
 // Btn7RXmtr2: Claw
@@ -89,7 +89,12 @@ task usercontrol()
 	int trueCh2;
     	int trueCh3;
 	while (true){
+		
+		if((vexRT[Btn7U] == 1) || (vexRT[Btn7UXmtr2] == 1)) {
+			wait1Msec(0500);
+			nAutonomous();
 			
+		}
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
 		if(driveController == 1 && direction == 1) {
 			trueCh2 = (vexRT[Ch2])/driveGear;
@@ -179,7 +184,7 @@ task usercontrol()
 			motor[frontMangonel] = 127;
 			motor[backMangonel] = 127;
 		}
-		else {
+		else if(vexRT[Btn6U] != 1) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
 			motor[frontMangonel] = 0;
 			motor[backMangonel] = 0;
 		}
@@ -217,5 +222,33 @@ void basicAutonomous(){
 }
 
 void nAutonomous(){
-
+	motor[frontMangonel] = 127;
+	motor[backMangonel] = 127;
+	wait1Msec(0500);
+	motor[frontMangonel] = 0;
+  	motor[backMangonel] = 0;
+  	motor[arm] = -127;
+  	wait1Msec(0600);
+  	motor[arm] = 0;
+  
+  	motor[left] = 127;
+  	motor[right] = 0;
+  	wait1Msec(0200);
+  	motor[left] = 127;
+  	motor[right] = 127;
+  	wait1Msec(1000);
+  	motor[left] = 0;
+  	motor[right] = 0;
+  	wait1Msec(1000);
+  	motor[left] = -127;
+  	motor[right] = -127;
+  	wait1Msec(0750);
+  	motor[left] = 127;
+  	motor[right] = 0;
+  	wait1Msec(0600);
+  	motor[left] = 127;
+  	motor[right] = 127;
+  	wait1Msec(1300);
+  	motor[left] = 0;
+  	motor[right] = 0;
 } 
