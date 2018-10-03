@@ -126,7 +126,7 @@ task usercontrol()
 			driveGear += 1;
 			wait1Msec(0500);
 		}
-		else if(((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1))&&(driveGear > 1)){
+		else if((((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1)))&&(driveGear > 1)){
 			driveGear -= 1;
 			wait1Msec(0500);
 		}
@@ -142,6 +142,13 @@ task usercontrol()
 		else if(vexRT[Btn6DXmtr2] == 1) {
 			motor[arm] = -127;
 		}
+		else if(vexRT[Btn5UXmtr2] == 1) {
+			motor[arm] = 63;
+		}
+		else if(vexRT[Btn5DXmtr2] == 1) {
+			motor[arm] = -63;
+		}
+		
 		else {
 			motor[arm] = 0;
 		}
@@ -151,6 +158,12 @@ task usercontrol()
 		}
 		else if(vexRT[Btn7RXmtr2] == 1) {
 			motor[claw] = -40;
+		}
+		else if(vexRT[Btn8LXmtr2] == 1) {
+			motor[claw] = 20;
+		}
+		else if(vexRT[Btn8RXmtr2] == 1) {
+			motor[claw] = -20;
 		}
 		else {
 			motor[claw] = 0;
