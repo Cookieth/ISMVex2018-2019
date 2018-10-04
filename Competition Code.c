@@ -1,3 +1,4 @@
+#pragma config(Sensor, in1,    potentiometer,  sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  limitSwitch,    sensorTouch)
 #pragma config(Motor,  port2,           right,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           left,          tmotorVex393_MC29, openLoop)
@@ -235,13 +236,13 @@ void basicAutonomous(){
 }
 
 void nAutonomous(){
-	motor[frontMangonel] = 127;
-	motor[backMangonel] = 127;
-	wait1Msec(0500);
-	motor[frontMangonel] = 0;
+		motor[frontMangonel] = 127;
+		motor[backMangonel] = 127;
+		wait1Msec(0500);
+		motor[frontMangonel] = 0;
   	motor[backMangonel] = 0;
   	motor[arm] = -127;
-  	wait1Msec(0600);
+  	wait1Msec(0500);
   	motor[arm] = 0;
   
   	motor[left] = 127;
@@ -249,19 +250,39 @@ void nAutonomous(){
   	wait1Msec(0200);
   	motor[left] = 127;
   	motor[right] = 127;
-  	wait1Msec(1000);
+  	wait1Msec(0790);
   	motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(1000);
   	motor[left] = -127;
   	motor[right] = -127;
-  	wait1Msec(0750);
-  	motor[left] = 127;
-  	motor[right] = 0;
-  	wait1Msec(0600);
-  	motor[left] = 127;
-  	motor[right] = 127;
-  	wait1Msec(1300);
+  	wait1Msec(0700);
   	motor[left] = 0;
   	motor[right] = 0;
+  	wait1Msec(1000);
+  	
+  	if(SensorValue[potentiometer] < 1000) {
+	  	
+	  	motor[arm] = 127;
+	  	wait1Msec(0500);
+	  	motor[arm] = 0;
+	  	
+	  	motor[left] = 127;
+	  	motor[right] = -127;
+	  	wait1Msec(0550);
+	  	motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+	  	motor[left] = 127;
+	  	motor[right] = 127;
+	  	wait1Msec(0810);
+	  	motor[left] = 0;
+	  	motor[right] = 0;
+	  	
+	  	motor[arm] = -127;
+	  	wait1Msec(0500);
+	  	motor[arm] = 0;
+  	}
+  	else if(SensorValue[potentiometer] > 3000) {
+  	}
 } 
