@@ -20,7 +20,7 @@ void nAutonomous();
 
 void pre_auton()
 {
-  bStopTasksBetweenModes = true;
+	bStopTasksBetweenModes = true;
 }
 
 task autonomous()
@@ -236,10 +236,10 @@ void basicAutonomous(){
 }
 
 void nAutonomous(){
-		motor[frontMangonel] = 127;
-		motor[backMangonel] = 127;
-		wait1Msec(0500);
-		motor[frontMangonel] = 0;
+	motor[frontMangonel] = 127;
+	motor[backMangonel] = 127;
+	wait1Msec(0500);
+	motor[frontMangonel] = 0;
   	motor[backMangonel] = 0;
   	motor[arm] = -127;
   	wait1Msec(0500);
@@ -260,29 +260,112 @@ void nAutonomous(){
   	motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(1000);
+	motor[arm] = 127;
+	wait1Msec(0500);
+	motor[arm] = 0;
   	
   	if(SensorValue[potentiometer] < 1000) {
-	  	
-	  	motor[arm] = 127;
-	  	wait1Msec(0500);
-	  	motor[arm] = 0;
-	  	
-	  	motor[left] = 127;
-	  	motor[right] = -127;
-	  	wait1Msec(0550);
-	  	motor[left] = 0;
+		//RED AUTON
+		motor[left] = 127;
+		motor[right] = -127;
+		wait1Msec(0550);
+		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
-	  	motor[left] = 127;
-	  	motor[right] = 127;
-	  	wait1Msec(0810);
-	  	motor[left] = 0;
-	  	motor[right] = 0;
-	  	
-	  	motor[arm] = -127;
-	  	wait1Msec(0500);
-	  	motor[arm] = 0;
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0810);
+		
+		//PUSHES CAP OFF OF BALL
+		motor[left] = 0;
+		motor[right] = 0;
+		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0100);
+		motor[left] = 0;
+		motor[right] = 0;
+		wait1Msec(0500);
+		motor[left] = -127;
+		motor[right] = -127;
+		wait1Msec(0100);
+		
+		//TURN TO HIT LOW FLAG
+		motor[left] = -127;
+		motor[right] = 127;
+		wait1Msec(0550);
+		motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0800);
   	}
+	else if(SensorValue[potentiometer] > 1000 && SensorValue[potentiometer] < 3000) {
+		//SKILLS AUTON
+		motor[left] = 127;
+		motor[right] = -127;
+		wait1Msec(0550);
+		motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0810);
+		motor[left] = 0;
+		motor[right] = 0;
+	  	
+		//FLIPS CAP OFF OF BALL
+		motor[arm] = -127;
+		wait1Msec(0500);
+		motor[arm] = 0;
+		
+		//TURN TO HIT LOW FLAG
+		motor[left] = -127;
+		motor[right] = 127;
+		wait1Msec(0550);
+		motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0800);
+	}
   	else if(SensorValue[potentiometer] > 3000) {
+		//BLUE AUTON
+		motor[left] = 127;
+		motor[right] = -127;
+		wait1Msec(0550);
+		motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0810);
+		
+		//PUSHES CAP OFF OF BALL
+		motor[left] = 0;
+		motor[right] = 0;
+		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0100);
+		motor[left] = 0;
+		motor[right] = 0;
+		wait1Msec(0500);
+		motor[left] = -127;
+		motor[right] = -127;
+		wait1Msec(0100);
+		
+		//TURN TO HIT LOW FLAG
+		motor[left] = 127;
+		motor[right] = -127;
+		wait1Msec(0550);
+		motor[left] = 0;
+  		motor[right] = 0;
+  		wait1Msec(0500);
+		motor[left] = 127;
+		motor[right] = 127;
+		wait1Msec(0800);
   	}
 } 
