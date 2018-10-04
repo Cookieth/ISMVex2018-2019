@@ -297,6 +297,9 @@ void nAutonomous(){
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
+		motor[arm] = -127;
+		wait1Msec(0500);
+		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
 		wait1Msec(0800);
@@ -364,6 +367,9 @@ void nAutonomous(){
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
+		motor[arm] = -127;
+		wait1Msec(0500);
+		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
 		wait1Msec(0800);
