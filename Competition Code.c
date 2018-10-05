@@ -250,7 +250,7 @@ void nAutonomous(){
   	wait1Msec(0200);
   	motor[left] = 127;
   	motor[right] = 127;
-  	wait1Msec(0790);
+  	wait1Msec(0785);
   	motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(1000);
@@ -261,14 +261,14 @@ void nAutonomous(){
   	motor[right] = 0;
   	wait1Msec(1000);
 	motor[arm] = 127;
-	wait1Msec(0500);
+	wait1Msec(0400);
 	motor[arm] = 0;
   	
   	if(SensorValue[potentiometer] < 1000) {
 		//RED AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -293,7 +293,7 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = -127;
 		motor[right] = 127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -302,19 +302,28 @@ void nAutonomous(){
 		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0800);
+		wait1Msec(0650);
+		motor[left] = 0;
+  	motor[right] = 0;
+  	wait1Msec(0500);
+		motor[left] = 127;
+  	motor[right] = -127;
+  	wait1Msec(0300);
+  	motor[left] = 127;
+  	motor[right] = 127;
+  	wait1Msec(0200);
   	}
 	else if(SensorValue[potentiometer] > 1000 && SensorValue[potentiometer] < 3000) {
 		//SKILLS AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0810);
+		wait1Msec(0850);
 		motor[left] = 0;
 		motor[right] = 0;
 	  	
@@ -326,25 +335,34 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = -127;
 		motor[right] = 127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0800);
+		wait1Msec(0650);
+		motor[left] = 0;
+  	motor[right] = 0;
+  	wait1Msec(0500);
+		motor[left] = 127;
+  	motor[right] = -127;
+  	wait1Msec(0300);
+  	motor[left] = 127;
+  	motor[right] = 127;
+  	wait1Msec(0200);
 	}
   	else if(SensorValue[potentiometer] > 3000) {
 		//BLUE AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0810);
+		wait1Msec(0850);
 		
 		//PUSHES CAP OFF OF BALL
 		motor[left] = 0;
@@ -363,7 +381,7 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0550);
+		wait1Msec(0500);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -372,6 +390,15 @@ void nAutonomous(){
 		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0800);
+		wait1Msec(0650);
+		motor[left] = 0;
+  	motor[right] = 0;
+  	wait1Msec(0500);
+		motor[left] = 127;
+  	motor[right] = -127;
+  	wait1Msec(0300);
+  	motor[left] = 127;
+  	motor[right] = 127;
+  	wait1Msec(0200);
   	}
 } 
