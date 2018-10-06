@@ -88,7 +88,11 @@ task usercontrol()
 	int direction = 1;
 	int driveController = 1;
 	int trueCh2;
-    	int trueCh3;
+  int trueCh3;
+  int mangonelState = 0;
+  
+  int threshold = 50;
+  
 	while (true){
 		
 		if((vexRT[Btn7U] == 1) || (vexRT[Btn7UXmtr2] == 1)) {
@@ -132,8 +136,37 @@ task usercontrol()
 			wait1Msec(0500);
 		}
 
-		motor[right] = trueCh2;
-		motor[left] = trueCh3;
+		if(trueCh2 > threshold){
+			motor[right] = trueCh2;
+		}
+		else if(trueCh2 > 10 && trueCh2 < threshold){
+			motor[right] = threshold;
+		}
+		else if(trueCh2 < -10 && trueCh2 > (-threshold)){
+			motor[right] = -threshold;
+		}
+		else if(trueCh2 < -threshold){
+			motor[right] = trueCh2;
+		}
+		else{
+			motor[right] = 0;
+		}
+		
+		if(trueCh3 > threshold){
+			motor[left] = trueCh3;
+		}
+		else if(trueCh3 > 10 && trueCh3 < threshold){
+			motor[left] = threshold;
+		}
+		else if(trueCh3 < -10 && trueCh3 > (-threshold)){
+			motor[left] = -threshold;
+		}
+		else if(trueCh3 < -threshold){
+			motor[left] = trueCh3;
+		}
+		else{
+			motor[left] = 0;
+		}
 
 		//=======================ARM CONTROL (PARTNER JOYSTICK)===================
 
@@ -155,10 +188,10 @@ task usercontrol()
 		}
 
 		if(vexRT[Btn7LXmtr2] == 1) {
-			motor[claw] = 40;
+			motor[claw] = 127;
 		}
 		else if(vexRT[Btn7RXmtr2] == 1) {
-			motor[claw] = -40;
+			motor[claw] = -127;
 		}
 		else if(vexRT[Btn8LXmtr2] == 1) {
 			motor[claw] = 20;
@@ -193,14 +226,20 @@ task usercontrol()
 		if(vexRT[Btn5U]==1) {
 			motor[frontMangonel] = 127;
 			motor[backMangonel] = 127;
+			mangonelState = 1;
 		}
-		else if(vexRT[Btn5D] == 1 && SensorValue[limitSwitch] != 1) {
+		else if(vexRT[Btn5D] == 1) {
+			motor[frontMangonel] = 0 ;
+			motor[backMangonel] = 0;
+		}
+		else if(mangonelState == 1/*vexRT[Btn5D] == 1*/ && SensorValue[limitSwitch] != 1) {
 			motor[frontMangonel] = 127;
 			motor[backMangonel] = 127;
 		}
-		else if(vexRT[Btn6U] != 1) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
+		else if(SensorValue[limitSwitch] == 1/*vexRT[Btn6U] != 1*/) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
 			motor[frontMangonel] = 0;
 			motor[backMangonel] = 0;
+			mangonelState = 0;
 		}
 	} //end of while loop
 }
@@ -265,10 +304,11 @@ void nAutonomous(){
 	motor[arm] = 0;
   	
   	if(SensorValue[potentiometer] < 1000) {
+  		/*
 		//RED AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0500);
+		wait1Msec(0550);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -293,7 +333,7 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = -127;
 		motor[right] = 127;
-		wait1Msec(0500);
+		wait1Msec(0525);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -302,7 +342,7 @@ void nAutonomous(){
 		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0650);
+		wait1Msec(0600);
 		motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(0500);
@@ -312,12 +352,13 @@ void nAutonomous(){
   	motor[left] = 127;
   	motor[right] = 127;
   	wait1Msec(0200);
+  	*/
   	}
 	else if(SensorValue[potentiometer] > 1000 && SensorValue[potentiometer] < 3000) {
 		//SKILLS AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0500);
+		wait1Msec(0550);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -335,13 +376,13 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = -127;
 		motor[right] = 127;
-		wait1Msec(0500);
+		wait1Msec(0525);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0650);
+		wait1Msec(0600);
 		motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(0500);
@@ -353,10 +394,11 @@ void nAutonomous(){
   	wait1Msec(0200);
 	}
   	else if(SensorValue[potentiometer] > 3000) {
+  		/*
 		//BLUE AUTON
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0500);
+		wait1Msec(0550);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -381,7 +423,7 @@ void nAutonomous(){
 		//TURN TO HIT LOW FLAG
 		motor[left] = 127;
 		motor[right] = -127;
-		wait1Msec(0500);
+		wait1Msec(0525);
 		motor[left] = 0;
   		motor[right] = 0;
   		wait1Msec(0500);
@@ -390,7 +432,7 @@ void nAutonomous(){
 		motor[arm] = 0;
 		motor[left] = 127;
 		motor[right] = 127;
-		wait1Msec(0650);
+		wait1Msec(0600);
 		motor[left] = 0;
   	motor[right] = 0;
   	wait1Msec(0500);
@@ -400,5 +442,6 @@ void nAutonomous(){
   	motor[left] = 127;
   	motor[right] = 127;
   	wait1Msec(0200);
+  	*/
   	}
 } 
