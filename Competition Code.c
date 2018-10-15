@@ -204,17 +204,17 @@ task usercontrol()
 		}
 
 	      	//=======================MANGONEL CONTROL (MAIN JOYSTICK)===================
-
+		
 		if(vexRT[Btn6U] == 1) {
 			motor[intake] = 127; //ADJUSTABLE
-			if(SensorValue[limitSwitch] != 1) {
+			/*if(SensorValue[limitSwitch] != 1) {
 				motor[frontMangonel] = 127;
 				motor[backMangonel] = 127;
 			}
 			else {
 				motor[frontMangonel] = 0;
 				motor[backMangonel] = 0;
-			}
+			}*/
 		}
 		else if(vexRT[Btn6D] == 1) {
 			motor[intake] = -127; //ADJUSTABLE
@@ -226,17 +226,17 @@ task usercontrol()
 		if(vexRT[Btn5U]==1) {
 			motor[frontMangonel] = 127;
 			motor[backMangonel] = 127;
-			mangonelState = 1;
+			//mangonelState = 1;
 		}
-		else if(vexRT[Btn5D] == 1) {
-			motor[frontMangonel] = 0 ;
-			motor[backMangonel] = 0;
-		}
-		else if(mangonelState == 1/*vexRT[Btn5D] == 1*/ && SensorValue[limitSwitch] != 1) {
-			motor[frontMangonel] = 127;
-			motor[backMangonel] = 127;
-		}
-		else if(SensorValue[limitSwitch] == 1/*vexRT[Btn6U] != 1*/) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
+		//else if(vexRT[Btn5D] == 1) {
+			//motor[frontMangonel] = 0 ;
+			//motor[backMangonel] = 0;
+		//}
+		//else if(mangonelState == 1/*vexRT[Btn5D] == 1*/ && SensorValue[limitSwitch] != 1) {
+			//motor[frontMangonel] = 127;
+			//motor[backMangonel] = 127;
+		//}
+		else if(/*SensorValue[limitSwitch] == 1*/vexRT[Btn6U] != 1) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
 			motor[frontMangonel] = 0;
 			motor[backMangonel] = 0;
 			mangonelState = 0;
