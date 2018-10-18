@@ -1,8 +1,8 @@
 #pragma config(Sensor, in1,    potentiometer,  sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  limitSwitch,    sensorTouch)
 #pragma config(Sensor, dgtl2,  rightEnc,       sensorQuadEncoder)
-#pragma config(Sensor, dgtl4,  leftEnc,        sensorQuadEncoder)
-#pragma config(Sensor, dgtl6,  rightSonar,     sensorSONAR_cm)
+#pragma config(Sensor, dgtl4,  rightSonar,     sensorSONAR_cm)
+#pragma config(Sensor, dgtl6,  leftEnc,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl8,  leftSonar,      sensorSONAR_cm)
 #pragma config(Sensor, dgtl10, clawEnc,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl12, intakeLimit,    sensorTouch)
@@ -105,6 +105,8 @@ task usercontrol()
   int highCapDist = 12;
   
   startTask(intakeControl);
+  SensorValue[leftEnc] = 0;
+  SensorValue[rightEnc] = 0;
   
 	while (true){
 	
