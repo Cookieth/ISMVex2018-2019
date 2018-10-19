@@ -1,4 +1,6 @@
-#pragma config(Sensor, in1,    potentiometer,  sensorPotentiometer)
+#pragma config(Sensor, in1,    leftArmPot,     sensorPotentiometer)
+#pragma config(Sensor, in2,    rightArmPot,    sensorPotentiometer)
+#pragma config(Sensor, in3,    autonPot,       sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  limitSwitch,    sensorTouch)
 #pragma config(Sensor, dgtl2,  rightEnc,       sensorQuadEncoder)
 #pragma config(Sensor, dgtl4,  rightSonar,     sensorSONAR_cm)
@@ -29,6 +31,12 @@ void nAutonomous();
 
 task intakeControl();
 task clawControl();
+task armControl();
+
+int leftArmState;
+int rightArmState;
+int leftPower;
+int rightPower;
 
 void pre_auton()
 {
@@ -110,17 +118,13 @@ task usercontrol()
   
   startTask(intakeControl);
   startTask(clawControl);
+  startTask(armControl);
   SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
   SensorValue[clawEnc] = 0;
   
 	while (true){
-	
-		if((vexRT[Btn7U] == 1) || (vexRT[Btn7UXmtr2] == 1)) {
-			wait1Msec(0500);
-			nAutonomous();	
-		}
-		else if(vexRT[Btn7L] == 1) {
+		if(vexRT[Btn7L] == 1) {
 			moveInches(24,-80);
 		}
 		else if(vexRT[Btn7R] == 1) {
@@ -205,31 +209,7 @@ task usercontrol()
 			motor[left2] = 0;
 		}
 
-		//=======================ARM CONTROL (PARTNER JOYSTICK)===================
-
-		if(vexRT[Btn6UXmtr2]==1) {
-			motor[arm] = 127;
-		}
-		else if(vexRT[Btn6DXmtr2] == 1) {
-			motor[arm] = -127;
-		}
-		else if(vexRT[Btn5UXmtr2] == 1) {
-			motor[arm] = 63;
-		}
-		else if(vexRT[Btn5DXmtr2] == 1) {
-			motor[arm] = -63;
-		}
-		
-		else {
-			motor[arm] = 0;
-		}
-
 	      	//=======================MANGONEL CONTROL (MAIN JOYSTICK)===================
-		
-
-		
-		
-		
 		if(vexRT[Btn5U]==1) {
 			motor[mangonel] = 127;
 			mangonelState = 1;
@@ -331,7 +311,7 @@ void nAutonomous(){
 	wait1Msec(0400);
 	motor[arm] = 0;
   	
-  	if(SensorValue[potentiometer] < 1000) {
+  	if(SensorValue[autonPot] < 1000) {
   		/*
 		//RED AUTON
 		motor[left] = 127;
@@ -382,7 +362,7 @@ void nAutonomous(){
   	wait1Msec(0200);
   	*/
   	}
-	else if(SensorValue[potentiometer] > 1000 && SensorValue[potentiometer] < 3000) {
+	else if(SensorValue[autonPot] > 1000 && SensorValue[autonPot] < 3000) {
 		//SKILLS AUTON
 		motor[left] = 127;
 		motor[right] = -127;
@@ -421,7 +401,7 @@ void nAutonomous(){
   	motor[right] = 127;
   	wait1Msec(0200);
 	}
-  	else if(SensorValue[potentiometer] > 3000) {
+  	else if(SensorValue[autonPot] > 3000) {
   		/*
 		//BLUE AUTON
 		motor[left] = 127;
@@ -476,27 +456,69 @@ void nAutonomous(){
 
 task clawControl() {
 	int clawState = 0;
-	if(vexRT[Btn7LXmtr2] == 1) {
-		clawState = clawState - 212;
-		wait1Msec(0100);
+	SensorValue[clawEnc] = 0;
+	while(true) {
+		if(vexRT[Btn7LXmtr2] == 1) {
+			clawState = clawState - 100;
+			wait1Msec(0100);
+		}
+		else if(vexRT[Btn7RXmtr2] == 1) {
+			clawState = clawState + 100;
+			wait1Msec(0100);
+		}
+		
+		int power = (int)((clawState - SensorValue[clawEnc])/3);
+		if(power > 127) {
+			power = 127;
+		}
+		else if(power < -127) {
+			power = -127;
+		}
+		else if(abs(power) < 10) {
+			power = 0;
+		}
+		
+		motor[claw] = power;
 	}
-	else if(vexRT[Btn7RXmtr2] == 1) {
-		clawState = clawState + 212;
-		wait1Msec(0100);
+}
+
+task armControl() {
+	leftArmState = SensorValue[leftArmPot];
+	rightArmState = SensorValue[rightArmPot];
+	while(true) {
+		if(vexRT[Btn6DXmtr2] == 1) {
+			leftArmState = leftArmState - 100;
+			rightArmState = rightArmState + 100;
+			wait1Msec(0100);
+		}
+		else if(vexRT[Btn6UXmtr2] == 1) {
+			leftArmState = leftArmState + 100;
+			rightArmState = rightArmState - 100;
+			wait1Msec(0100);
+		}
+		
+		leftPower = (int)((leftArmState - SensorValue[leftArmPot])/4);
+		rightPower = (int)((SensorValue[rightArmPot] - rightArmState)/4);
+		if(leftPower > 127) {
+			leftPower = 127;
+		}
+		else if(leftPower < -127) {
+			leftPower = -127;
+		}
+		
+		if(rightPower > 127) {
+			rightPower = 127;
+		}
+		else if(rightPower < -127) {
+			rightPower = -127;
+		}
+		int avgPower = (int)((rightPower + leftPower)/2);
+		if(abs(avgPower) < 20) {
+			avgPower = 0;
+		}
+		
+		motor[arm] = avgPower;
 	}
-	
-	int power = (int)((clawState - SensorValue[clawEnc])/3);
-	if(power > 127) {
-		power = 127;
-	}
-	else if(power < -127) {
-		power = -127;
-	}
-	else if(abs(power) < 20) {
-		power = 0;
-	}
-	
-	motor[claw] = power;
 }
 
 task intakeControl(){
@@ -506,35 +528,21 @@ task intakeControl(){
 	while(true){
 		if(vexRT[Btn6U] == 1 && intakeDownState == -1) {
 			intakeUpState = intakeUpState * -1;
-			wait1Msec(0500);
-			//motor[intake] = 127; //ADJUSTABLE
-			/*if(SensorValue[limitSwitch] != 1) {
-				motor[frontMangonel] = 127;
-				motor[backMangonel] = 127;
-			}
-			else {
-				motor[frontMangonel] = 0;
-				motor[backMangonel] = 0;
-			}*/
+			wait1Msec(0100);
 		}
 		else if(vexRT[Btn6U] == 1 && intakeDownState == 1){
 			intakeDownState = intakeDownState * -1;
 			intakeUpState = intakeUpState * -1;
-			wait1Msec(0500);
+			wait1Msec(0100);
 		}
 		else if(vexRT[Btn6D] == 1 && intakeUpState == -1) {
 			intakeDownState = intakeDownState * -1;
-			wait1Msec(0500);
-			//motor[intake] = -127; //ADJUSTABLE
+			wait1Msec(0100);
 		}
 		else if(vexRT[Btn6D] == 1 && intakeUpState == 1) {
 			intakeUpState = intakeUpState * -1;
 			intakeDownState = intakeDownState * -1;
-			wait1Msec(0500);
-			//motor[intake] = -127; //ADJUSTABLE
-		}
-		else {
-			
+			wait1Msec(0100);
 		}
 		
 		if(intakeUpState == 1){
