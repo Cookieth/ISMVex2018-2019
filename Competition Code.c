@@ -536,28 +536,19 @@ task armControl() {
 }
 
 void toggleIntakeUp() {
-	if(intakeDownState == -1) {
-		intakeUpState = intakeUpState * -1;
-	}
-	else if(intakeDownState == 1){
-		intakeDownState = intakeDownState * -1;
-		intakeUpState = intakeUpState * -1;
-	}
+	intakeUpState = intakeUpState * -1;
+	if(intakeDownState == 1){ intakeDownState = intakeDownState * -1; }
 }
 
 void toggleIntakeDown() {
-	if(intakeUpState == -1) {
-		intakeDownState = intakeDownState * -1;
-	}
-	else if(intakeUpState == 1) {
-		intakeUpState = intakeUpState * -1;
-		intakeDownState = intakeDownState * -1;
-	}
+	intakeDownState = intakeDownState * -1;
+	if(intakeUpState == 1) { intakeUpState = intakeUpState * -1;}
 }
 
 task intakeControl(){
 	intakeUpState = -1;
   	intakeDownState = -1;
+	int ball = 0;
   
 	while(true){
 		if(vexRT[Btn6U] == 1) {
@@ -569,11 +560,22 @@ task intakeControl(){
 			wait1Msec(0100);
 		}
 		
-		if(intakeUpState == 1){
+		if(vexRT[intakeLimit] == 1 && ball == 0) {
+			ball = 1;
+  			intakeUpState = -1;
+  			intakeDownState = -1;
+			motor[intake] = 0;
+
+		}
+		else if(intakeUpState == 1){
 			motor[intake] = 127;
+			ball = 0;
+			wait1Msec(0200);
 		}
 		else if(intakeDownState == 1){
 			motor[intake] = -127;
+			ball = 0;
+			wait1Msec(0200);
 		}
 		else{
 			motor[intake] = 0;
