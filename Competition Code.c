@@ -21,10 +21,14 @@
 
 #include "Vex_Competition_Includes.c"
 
-void basicAutonomous();
+#define abs(X) ((X < 0) ? -1 * X : X)
+
+void moveDegrees(int degrees, int power);
+void moveInches(int inches, int power);
 void nAutonomous();
 
 task intakeControl();
+task clawControl();
 
 void pre_auton()
 {
@@ -57,8 +61,8 @@ task autonomous()
 // Btn6D: Intake
 // Btn7U: Auton Tester
 // Btn7D: Switch Controller
-// Btn7L:
-// Btn7R:
+// Btn7L: MoveInches Tester
+// Btn7R: MoveInches Tester
 // Btn8U:
 // Btn8D: Switch Direction
 // Btn8L: Change "Gear"
@@ -105,16 +109,24 @@ task usercontrol()
   int highCapDist = 12;
   
   startTask(intakeControl);
+  startTask(clawControl);
   SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
+  SensorValue[clawEnc] = 0;
   
 	while (true){
 	
 		if((vexRT[Btn7U] == 1) || (vexRT[Btn7UXmtr2] == 1)) {
 			wait1Msec(0500);
-			nAutonomous();
-			
+			nAutonomous();	
 		}
+		else if(vexRT[Btn7L] == 1) {
+			moveInches(24,-80);
+		}
+		else if(vexRT[Btn7R] == 1) {
+			moveInches(24,80);
+		}
+		
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
 		if(driveController == 1 && direction == 1) {
 			trueCh2 = (vexRT[Ch2])/driveGear;
@@ -212,22 +224,6 @@ task usercontrol()
 			motor[arm] = 0;
 		}
 
-		if(vexRT[Btn7LXmtr2] == 1) {
-			motor[claw] = 127;
-		}
-		else if(vexRT[Btn7RXmtr2] == 1) {
-			motor[claw] = -127;
-		}
-		else if(vexRT[Btn8LXmtr2] == 1) {
-			motor[claw] = 20;
-		}
-		else if(vexRT[Btn8RXmtr2] == 1) {
-			motor[claw] = -20;
-		}
-		else {
-			motor[claw] = 0;
-		}
-
 	      	//=======================MANGONEL CONTROL (MAIN JOYSTICK)===================
 		
 
@@ -257,24 +253,55 @@ task usercontrol()
 //
 //---------------------------------------------------------------------------------------------------------------
 
-void basicAutonomous(){
-  motor[left] = 127;
-  motor[right] = 127;
-  wait1Msec(2000);
-  motor[left] = -127;
-  motor[right] = -127;
-  wait1Msec(1000);
-  motor[left] = 127;
-  motor[right] = 0;
-  wait1Msec(1000);
-  motor[left] = 127;
-  motor[right] = 127;
-  wait1Msec(2000);
-  motor[left] = 0;
-  motor[right] = 0;
-  wait1Msec(2000);
-
-  motor[mangonel] = 0;
+void moveDegrees(int degrees, int power) { //Positive power moves to the right
+	int powerBias = 0;
+	SensorValue[leftEnc] = 0;
+  SensorValue[rightEnc] = 0;
+	float ticks = 2.5 * degrees;
+	while(abs(SensorValue[rightEnc]) < ticks || abs(SensorValue[leftEnc]) < ticks) {
+		if(abs(SensorValue[rightEnc]) < ticks) {
+			motor[right] = -power + powerBias;
+			motor[right2] = -power + powerBias;
+		}
+		else {
+			motor[right] = 0;
+			motor[right2] = 0;
+		}
+		   
+		if(abs(SensorValue[leftEnc]) < ticks) {
+			motor[left] = power;
+			motor[left2] = power;
+		}
+		else {
+			motor[left] = 0;
+			motor[left2] = 0;
+		}
+	}
+}
+	   
+void moveInches(int inches, int power) { //Positive power moves forward
+	SensorValue[leftEnc] = 0;
+  	SensorValue[rightEnc] = 0;
+	float ticks = 20 * inches;
+	while(abs(SensorValue[rightEnc]) < ticks || abs(SensorValue[leftEnc]) < ticks) {
+		if(abs(SensorValue[rightEnc]) < ticks) {
+			motor[right] = power;
+			motor[right2] = power;
+		}
+		else {
+			motor[right] = 0;
+			motor[right2] = 0;
+		}
+		   
+		if(abs(SensorValue[leftEnc]) < ticks) {
+			motor[left] = power;
+			motor[left2] = power;
+		}
+		else {
+			motor[left] = 0;
+			motor[left2] = 0;
+		}
+	}
 }
 
 void nAutonomous(){
@@ -447,6 +474,30 @@ void nAutonomous(){
   	}
 } 
 
+task clawControl() {
+	int clawState = 0;
+	if(vexRT[Btn7LXmtr2] == 1) {
+		clawState = clawState - 212;
+		wait1Msec(0100);
+	}
+	else if(vexRT[Btn7RXmtr2] == 1) {
+		clawState = clawState + 212;
+		wait1Msec(0100);
+	}
+	
+	int power = (int)((clawState - SensorValue[clawEnc])/3);
+	if(power > 127) {
+		power = 127;
+	}
+	else if(power < -127) {
+		power = -127;
+	}
+	else if(abs(power) < 20) {
+		power = 0;
+	}
+	
+	motor[claw] = power;
+}
 
 task intakeControl(){
 	int intakeUpState = -1;
@@ -495,61 +546,5 @@ task intakeControl(){
 		else{
 			motor[intake] = 0;
 		}
-	}
-}
-
-void moveDegrees(int degrees, int power) { //Positive power moves to the rigt
-	SensorValue[leftEnc] = 0;
-  	SensorValue[rightEnc] = 0;
-	float ticks = 3.4 * degrees;
-	if(abs(SensorValue[rightEnc]) < ticks) {
-		motor[right] = power;
-		motor[right2] = power;
-	}
-	else {
-		motor[right] = 0;
-		motor[right2] = 0;
-	}
-	   
-	if(abs(SensorValue[leftEnc]) < ticks) {
-		motor[left] = -power;
-		motor[left2] = power;
-	}
-	else {
-		motor[left] = 0;
-		motor[left2] = 0;
-	}
-}
-	   
-void moveInches(int inches, int power) { //Positive power moves forward
-	SensorValue[leftEnc] = 0;
-  	SensorValue[rightEnc] = 0;
-	float ticks = 28 * inches;
-	
-	if(abs(SensorValue[rightEnc]) < ticks) {
-		motor[right] = power;
-		motor[right2] = power;
-	}
-	else {
-		motor[right] = 0;
-		motor[right2] = 0;
-	}
-	   
-	if(abs(SensorValue[leftEnc]) < ticks) {
-		motor[left] = -power;
-		motor[left2] = power;
-	}
-	else {
-		motor[left] = 0;
-		motor[left2] = 0;
-	}
-}
-
-int abs(int n) {
-	if(n > 0) {
-		return n;
-	}
-	else {
-		return n * -1;
 	}
 }
