@@ -497,3 +497,59 @@ task intakeControl(){
 		}
 	}
 }
+
+void moveDegrees(int degrees, int power) { //Positive power moves to the rigt
+	SensorValue[leftEnc] = 0;
+  	SensorValue[rightEnc] = 0;
+	float ticks = 3.4 * degrees;
+	if(abs(SensorValue[rightEnc]) < ticks) {
+		motor[right] = power;
+		motor[right2] = power;
+	}
+	else {
+		motor[right] = 0;
+		motor[right2] = 0;
+	}
+	   
+	if(abs(SensorValue[leftEnc]) < ticks) {
+		motor[left] = -power;
+		motor[left2] = power;
+	}
+	else {
+		motor[left] = 0;
+		motor[left2] = 0;
+	}
+}
+	   
+void moveInches(int inches, int power) { //Positive power moves forward
+	SensorValue[leftEnc] = 0;
+  	SensorValue[rightEnc] = 0;
+	float ticks = 28 * inches;
+	
+	if(abs(SensorValue[rightEnc]) < ticks) {
+		motor[right] = power;
+		motor[right2] = power;
+	}
+	else {
+		motor[right] = 0;
+		motor[right2] = 0;
+	}
+	   
+	if(abs(SensorValue[leftEnc]) < ticks) {
+		motor[left] = -power;
+		motor[left2] = power;
+	}
+	else {
+		motor[left] = 0;
+		motor[left2] = 0;
+	}
+}
+
+int abs(int n) {
+	if(n > 0) {
+		return n;
+	}
+	else {
+		return n * -1;
+	}
+}
