@@ -25,18 +25,27 @@
 
 #define abs(X) ((X < 0) ? -1 * X : X)
 
-void moveDegrees(int degrees, int power);
-void moveInches(int inches, int power);
 void nAutonomous();
+void moveDegrees(int degrees, int power); //Positive power moves to the right
+void moveInches(int inches, int power); //Positive power moves forward
 
 task intakeControl();
-task clawControl();
-task armControl();
+void toggleIntakeDown()
+void toggleIntakeUp();
 
+task clawControl();
+void moveClaw(int degrees);//Positive moves claw up
+
+task armControl();
+void moveArm(int degrees); //Positive moves arm up
+
+int clawState;
 int leftArmState;
 int rightArmState;
 int leftPower;
 int rightPower;
+int intakeUpState;
+int intakeDownState;
 
 void pre_auton()
 {
@@ -454,16 +463,20 @@ void nAutonomous(){
   	}
 } 
 
+void moveClaw(int degrees) { //Positive moves claw up
+	clawState = clawState + 5 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
+} 
+
 task clawControl() {
-	int clawState = 0;
+	clawState = 0;
 	SensorValue[clawEnc] = 0;
 	while(true) {
-		if(vexRT[Btn7LXmtr2] == 1) {
-			clawState = clawState - 100;
+		if(vexRT[Btn5DXmtr2] == 1) {
+			moveClaw(-20);
 			wait1Msec(0100);
 		}
-		else if(vexRT[Btn7RXmtr2] == 1) {
-			clawState = clawState + 100;
+		else if(vexRT[Btn5UXmtr2] == 1) {
+			moveClaw(20);
 			wait1Msec(0100);
 		}
 		
@@ -482,18 +495,21 @@ task clawControl() {
 	}
 }
 
+void moveArm(int degrees) { //Positive moves arm up
+	leftArmState = leftArmState + 10 * degrees; //around 10 potentiometer ticks per degree (according to calculations)
+	rightArmState = rightArmState - 10 * degrees; 
+}
+
 task armControl() {
 	leftArmState = SensorValue[leftArmPot];
 	rightArmState = SensorValue[rightArmPot];
 	while(true) {
 		if(vexRT[Btn6DXmtr2] == 1) {
-			leftArmState = leftArmState - 100;
-			rightArmState = rightArmState + 100;
+			moveArm(-20);
 			wait1Msec(0100);
 		}
 		else if(vexRT[Btn6UXmtr2] == 1) {
-			leftArmState = leftArmState + 100;
-			rightArmState = rightArmState - 100;
+			moveArm(20);
 			wait1Msec(0100);
 		}
 		
@@ -521,27 +537,37 @@ task armControl() {
 	}
 }
 
+void toggleIntakeUp() {
+	if(intakeDownState == -1) {
+		intakeUpState = intakeUpState * -1;
+	}
+	else if(intakeDownState == 1){
+		intakeDownState = intakeDownState * -1;
+		intakeUpState = intakeUpState * -1;
+	}
+}
+
+void toggleIntakeDown() {
+	if(intakeUpState == -1) {
+		intakeDownState = intakeDownState * -1;
+	}
+	else if(intakeUpState == 1) {
+		intakeUpState = intakeUpState * -1;
+		intakeDownState = intakeDownState * -1;
+	}
+}
+
 task intakeControl(){
-	int intakeUpState = -1;
-  int intakeDownState = -1;
+	intakeUpState = -1;
+  	intakeDownState = -1;
   
 	while(true){
-		if(vexRT[Btn6U] == 1 && intakeDownState == -1) {
-			intakeUpState = intakeUpState * -1;
+		if(vexRT[Btn6U] == 1) {
+			toggleIntakeUP();
 			wait1Msec(0100);
 		}
-		else if(vexRT[Btn6U] == 1 && intakeDownState == 1){
-			intakeDownState = intakeDownState * -1;
-			intakeUpState = intakeUpState * -1;
-			wait1Msec(0100);
-		}
-		else if(vexRT[Btn6D] == 1 && intakeUpState == -1) {
-			intakeDownState = intakeDownState * -1;
-			wait1Msec(0100);
-		}
-		else if(vexRT[Btn6D] == 1 && intakeUpState == 1) {
-			intakeUpState = intakeUpState * -1;
-			intakeDownState = intakeDownState * -1;
+		else if(vexRT[Btn6D] == 1) {
+			toggleIntakeDown();
 			wait1Msec(0100);
 		}
 		
