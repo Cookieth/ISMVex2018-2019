@@ -78,8 +78,8 @@ task autonomous()
 // Btn6D: Intake
 // Btn7U: Auton Tester
 // Btn7D: Switch Controller
-// Btn7L: MoveInches Tester
-// Btn7R: MoveInches Tester
+// Btn7L: 
+// Btn7R: 
 // Btn8U:
 // Btn8D: Switch Direction
 // Btn8L: Change "Gear"
@@ -94,14 +94,14 @@ task autonomous()
 // AccelXXmtr2:
 // AccelYXmtr2:
 // AccelZXmtr2:
-// Btn5UXmtr2:
-// Btn5DXmtr2:
-// Btn6UXmtr2: Claw --> Arm
-// Btn5DXmtr2: Claw --> Arm
+// Btn5UXmtr2: Claw
+// Btn5DXmtr2: Claw
+// Btn6UXmtr2: Arm
+// Btn6DXmtr2: Arm
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
-// Btn7LXmtr2: Claw
-// Btn7RXmtr2: Claw
+// Btn7LXmtr2: 
+// Btn7RXmtr2: 
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
@@ -133,13 +133,11 @@ task usercontrol()
   SensorValue[clawEnc] = 0;
   
 	while (true){
-		if(vexRT[Btn7L] == 1) {
-			moveInches(24,-80);
-		}
-		else if(vexRT[Btn7R] == 1) {
-			moveInches(24,80);
-		}
 		
+		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
+			nAutonomous();
+		}
+
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
 		if(driveController == 1 && direction == 1) {
 			trueCh2 = (vexRT[Ch2])/driveGear;
