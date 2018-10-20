@@ -26,11 +26,11 @@
 #define abs(X) ((X < 0) ? -1 * X : X)
 
 void nAutonomous();
-void moveDegrees(int degrees, int power); //Positive power moves to the right
-void moveInches(int inches, int power); //Positive power moves forward
+void moveDegrees(int degrees); //Positive degrees turn left
+void moveInches(int inches); //Positive inches moves forward
 
 task intakeControl();
-void toggleIntakeDown()
+void toggleIntakeDown();
 void toggleIntakeUp();
 
 task clawControl();
@@ -46,6 +46,9 @@ int leftPower;
 int rightPower;
 int intakeUpState;
 int intakeDownState;
+int rightBasePower;
+int leftBasePower;
+float baseTicks;
 
 void pre_auton()
 {
@@ -78,8 +81,8 @@ task autonomous()
 // Btn6D: Intake
 // Btn7U: Auton Tester
 // Btn7D: Switch Controller
-// Btn7L: 
-// Btn7R: 
+// Btn7L:
+// Btn7R:
 // Btn8U:
 // Btn8D: Switch Direction
 // Btn8L: Change "Gear"
@@ -100,8 +103,8 @@ task autonomous()
 // Btn6DXmtr2: Arm
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
-// Btn7LXmtr2: 
-// Btn7RXmtr2: 
+// Btn7LXmtr2:
+// Btn7RXmtr2:
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
@@ -119,23 +122,35 @@ task usercontrol()
 	int trueCh2;
   int trueCh3;
   int mangonelState = 0;
-  
+
   int threshold = 50;
-  
+
   int lowCapDist = 12;
   int highCapDist = 12;
-  
+
   startTask(intakeControl);
   startTask(clawControl);
   startTask(armControl);
   SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
   SensorValue[clawEnc] = 0;
-  
+
 	while (true){
-		
+
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
 			nAutonomous();
+		}
+		else if(vexRT[Btn7R] == 1) {
+			moveDegrees(-90);
+		}
+		else if(vexRT[Btn7L] == 1) {
+			moveDegrees(90);
+		}
+		else if(vexRT[Btn7RXmtr2] == 1) {
+			moveInches(24);
+		}
+		else if(vexRT[Btn7LXmtr2] == 1) {
+			moveInches(-24);
 		}
 
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
@@ -194,7 +209,7 @@ task usercontrol()
 			motor[right] = 0;
 			motor[right2] = 0;
 		}
-		
+
 		if(trueCh3 > threshold){
 			motor[left] = trueCh3;
 			motor[left2] = trueCh3;
@@ -240,244 +255,98 @@ task usercontrol()
 //
 //---------------------------------------------------------------------------------------------------------------
 
-void moveDegrees(int degrees, int power) { //Positive power moves to the right
-	int powerBias = 0;
-	SensorValue[leftEnc] = 0;
-  SensorValue[rightEnc] = 0;
-	float ticks = 2.5 * degrees;
-	while(abs(SensorValue[rightEnc]) < ticks || abs(SensorValue[leftEnc]) < ticks) {
-		if(abs(SensorValue[rightEnc]) < ticks) {
-			motor[right] = -power + powerBias;
-			motor[right2] = -power + powerBias;
-		}
-		else {
-			motor[right] = 0;
-			motor[right2] = 0;
-		}
-		   
-		if(abs(SensorValue[leftEnc]) < ticks) {
-			motor[left] = power;
-			motor[left2] = power;
-		}
-		else {
-			motor[left] = 0;
-			motor[left2] = 0;
-		}
+int limiter(int n, int lowerBound) {
+	if(n > 127) {
+			return 127;
+	}
+	else if(n < -127) {
+			return -127;
+	}
+	else if(n > -lowerBound && n < lowerBound) {
+			return 0;
+	}
+	else {
+		return n;
 	}
 }
-	   
-void moveInches(int inches, int power) { //Positive power moves forward
+
+void moveDegrees(int degrees) { //Positive degrees turns left
 	SensorValue[leftEnc] = 0;
-  	SensorValue[rightEnc] = 0;
-	float ticks = 20 * inches;
-	while(abs(SensorValue[rightEnc]) < ticks || abs(SensorValue[leftEnc]) < ticks) {
-		if(abs(SensorValue[rightEnc]) < ticks) {
-			motor[right] = power;
-			motor[right2] = power;
-		}
-		else {
-			motor[right] = 0;
-			motor[right2] = 0;
-		}
-		   
-		if(abs(SensorValue[leftEnc]) < ticks) {
-			motor[left] = power;
-			motor[left2] = power;
-		}
-		else {
-			motor[left] = 0;
-			motor[left2] = 0;
-		}
+  SensorValue[rightEnc] = 0;
+	baseTicks = 3.3 * degrees;
+	rightBasePower = baseTicks - SensorValue[rightEnc];
+	leftBasePower = - SensorValue[leftEnc] - baseTicks;
+	int lowerBound = 30;
+	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
+			motor[right] = limiter(rightBasePower,lowerBound);
+			motor[right2] = limiter(rightBasePower,lowerBound);
+			motor[left] = limiter(leftBasePower,lowerBound);
+			motor[left2] = limiter(leftBasePower,lowerBound);
+			rightBasePower = baseTicks - SensorValue[rightEnc];
+			leftBasePower = - SensorValue[leftEnc] - baseTicks;
+	}
+}
+
+void moveInches(int inches) { //Positive power moves forward
+	SensorValue[leftEnc] = 0;
+  SensorValue[rightEnc] = 0;
+	baseTicks = 20 * inches;
+	rightBasePower = baseTicks - SensorValue[rightEnc];
+	leftBasePower = baseTicks - SensorValue[leftEnc];
+	int lowerBound = 30;
+	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
+			motor[right] = limiter(rightBasePower,lowerBound);
+			motor[right2] = limiter(rightBasePower,lowerBound);
+			motor[left] = limiter(leftBasePower,lowerBound);
+			motor[left2] = limiter(leftBasePower,lowerBound);
+			rightBasePower = baseTicks - SensorValue[rightEnc];
+			leftBasePower = baseTicks - SensorValue[leftEnc];
 	}
 }
 
 void nAutonomous(){
+	moveDegrees(-30);
+	moveInches(-12);
+	moveClaw(-135);
+	moveInches(12);
 	motor[mangonel] = 127;
 	wait1Msec(0500);
-	motor[mangonel] = 0;
-  	motor[arm] = -127;
-  	wait1Msec(0500);
-  	motor[arm] = 0;
-  
-  	motor[left] = 127;
-  	motor[right] = 0;
-  	wait1Msec(0200);
-  	motor[left] = 127;
-  	motor[right] = 127;
-  	wait1Msec(0785);
-  	motor[left] = 0;
-  	motor[right] = 0;
-  	wait1Msec(1000);
-  	motor[left] = -127;
-  	motor[right] = -127;
-  	wait1Msec(0700);
-  	motor[left] = 0;
-  	motor[right] = 0;
-  	wait1Msec(1000);
-	motor[arm] = 127;
-	wait1Msec(0400);
-	motor[arm] = 0;
-  	
-  	if(SensorValue[autonPot] < 1000) {
-  		/*
-		//RED AUTON
-		motor[left] = 127;
-		motor[right] = -127;
-		wait1Msec(0550);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0810);
-		
-		//PUSHES CAP OFF OF BALL
-		motor[left] = 0;
-		motor[right] = 0;
-		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0100);
-		motor[left] = 0;
-		motor[right] = 0;
-		wait1Msec(0500);
-		motor[left] = -127;
-		motor[right] = -127;
-		wait1Msec(0100);
-		
-		//TURN TO HIT LOW FLAG
-		motor[left] = -127;
-		motor[right] = 127;
-		wait1Msec(0525);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[arm] = -127;
-		wait1Msec(0500);
-		motor[arm] = 0;
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0600);
-		motor[left] = 0;
-  	motor[right] = 0;
-  	wait1Msec(0500);
-		motor[left] = 127;
-  	motor[right] = -127;
-  	wait1Msec(0300);
-  	motor[left] = 127;
-  	motor[right] = 127;
-  	wait1Msec(0200);
-  	*/
-  	}
-	else if(SensorValue[autonPot] > 1000 && SensorValue[autonPot] < 3000) {
-		//SKILLS AUTON
-		motor[left] = 127;
-		motor[right] = -127;
-		wait1Msec(0550);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0850);
-		motor[left] = 0;
-		motor[right] = 0;
-	  	
-		//FLIPS CAP OFF OF BALL
-		motor[arm] = -127;
-		wait1Msec(0500);
-		motor[arm] = 0;
-		
-		//TURN TO HIT LOW FLAG
-		motor[left] = -127;
-		motor[right] = 127;
-		wait1Msec(0525);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0600);
-		motor[left] = 0;
-  	motor[right] = 0;
-  	wait1Msec(0500);
-		motor[left] = 127;
-  	motor[right] = -127;
-  	wait1Msec(0300);
-  	motor[left] = 127;
-  	motor[right] = 127;
-  	wait1Msec(0200);
+	while(SensorValue[limitSwitch] != 1) {
+		//Do nothing
 	}
-  	else if(SensorValue[autonPot] > 3000) {
-  		/*
-		//BLUE AUTON
-		motor[left] = 127;
-		motor[right] = -127;
-		wait1Msec(0550);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0850);
-		
-		//PUSHES CAP OFF OF BALL
-		motor[left] = 0;
-		motor[right] = 0;
-		wait1Msec(0500);
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0100);
-		motor[left] = 0;
-		motor[right] = 0;
-		wait1Msec(0500);
-		motor[left] = -127;
-		motor[right] = -127;
-		wait1Msec(0100);
-		
-		//TURN TO HIT LOW FLAG
-		motor[left] = 127;
-		motor[right] = -127;
-		wait1Msec(0525);
-		motor[left] = 0;
-  		motor[right] = 0;
-  		wait1Msec(0500);
-		motor[arm] = -127;
-		wait1Msec(0500);
-		motor[arm] = 0;
-		motor[left] = 127;
-		motor[right] = 127;
-		wait1Msec(0600);
-		motor[left] = 0;
-  	motor[right] = 0;
-  	wait1Msec(0500);
-		motor[left] = 127;
-  	motor[right] = -127;
-  	wait1Msec(0300);
-  	motor[left] = 127;
-  	motor[right] = 127;
-  	wait1Msec(0200);
-  	*/
-  	}
-} 
+	motor[mangonel] = 0;
+	moveDegrees(30);
+	moveInches(36);
+	moveInches(-36);
+	moveDegrees(90);
+	moveInches(-36);
+	toggleIntakeUp();
+	while(SensorValue[intakeLimit] != 1) {
+		//Do nothing
+	}
+	toggleIntakeDown();
+	moveInches(-12);
+	toggleIntakeDown(); //Turn intake off
+	moveInches(48);
+}
 
 void moveClaw(int degrees) { //Positive moves claw up
-	clawState = clawState + 5 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
-} 
+	clawState = clawState + 3 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
+}
 
 task clawControl() {
 	clawState = 0;
 	SensorValue[clawEnc] = 0;
 	while(true) {
 		if(vexRT[Btn5DXmtr2] == 1) {
-			moveClaw(-20);
+			moveClaw(-30);
 			wait1Msec(0100);
 		}
 		else if(vexRT[Btn5UXmtr2] == 1) {
-			moveClaw(20);
+			moveClaw(30);
 			wait1Msec(0100);
 		}
-		
+
 		int power = (int)((clawState - SensorValue[clawEnc])/3);
 		if(power > 127) {
 			power = 127;
@@ -488,29 +357,40 @@ task clawControl() {
 		else if(abs(power) < 10) {
 			power = 0;
 		}
-		
+
 		motor[claw] = power;
 	}
 }
 
 void moveArm(int degrees) { //Positive moves arm up
 	leftArmState = leftArmState + 10 * degrees; //around 10 potentiometer ticks per degree (according to calculations)
-	rightArmState = rightArmState - 10 * degrees; 
+	rightArmState = rightArmState - 10 * degrees;
 }
 
 task armControl() {
+	while(true) {
+	if(vexRT[Btn6DXmtr2] == 1) {
+			motor[arm] = -100;
+		}
+		else if(vexRT[Btn6UXmtr2] == 1) {
+			motor[arm] = 100;
+		}	
+		else {
+			motor[arm] = 0;
+		}
+/*
 	leftArmState = SensorValue[leftArmPot];
 	rightArmState = SensorValue[rightArmPot];
 	while(true) {
 		if(vexRT[Btn6DXmtr2] == 1) {
-			moveArm(-20);
-			wait1Msec(0100);
+			moveArm(-3);
+			wait1Msec(0050);
 		}
 		else if(vexRT[Btn6UXmtr2] == 1) {
-			moveArm(20);
-			wait1Msec(0100);
+			moveArm(3);
+			wait1Msec(0050);
 		}
-		
+
 		leftPower = (int)((leftArmState - SensorValue[leftArmPot])/4);
 		rightPower = (int)((SensorValue[rightArmPot] - rightArmState)/4);
 		if(leftPower > 127) {
@@ -519,7 +399,7 @@ task armControl() {
 		else if(leftPower < -127) {
 			leftPower = -127;
 		}
-		
+
 		if(rightPower > 127) {
 			rightPower = 127;
 		}
@@ -527,40 +407,49 @@ task armControl() {
 			rightPower = -127;
 		}
 		int avgPower = (int)((rightPower + leftPower)/2);
-		if(abs(avgPower) < 20) {
+
+		if(abs(avgPower) < 30) {
 			avgPower = 0;
 		}
-		
+		else if(abs(avgPower) < 50) {
+			avgPower = 20;
+		}
+
 		motor[arm] = avgPower;
-	}
+		*/
+	} 
 }
 
 void toggleIntakeUp() {
 	intakeUpState = intakeUpState * -1;
-	if(intakeDownState == 1){ intakeDownState = intakeDownState * -1; }
+	if(intakeDownState == 1){
+		intakeDownState = intakeDownState * -1;
+		}
 }
 
 void toggleIntakeDown() {
 	intakeDownState = intakeDownState * -1;
-	if(intakeUpState == 1) { intakeUpState = intakeUpState * -1;}
+	if(intakeUpState == 1) {
+		intakeUpState = intakeUpState * -1;
+		}
 }
 
 task intakeControl(){
 	intakeUpState = -1;
   	intakeDownState = -1;
 	int ball = 0;
-  
+
 	while(true){
 		if(vexRT[Btn6U] == 1) {
-			toggleIntakeUP();
+			toggleIntakeUp();
 			wait1Msec(0100);
 		}
 		else if(vexRT[Btn6D] == 1) {
 			toggleIntakeDown();
 			wait1Msec(0100);
 		}
-		
-		if(vexRT[intakeLimit] == 1 && ball == 0) {
+
+		if(SensorValue[intakeLimit] == 1 && ball == 0) {
 			ball = 1;
   			intakeUpState = -1;
   			intakeDownState = -1;
