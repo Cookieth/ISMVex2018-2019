@@ -272,7 +272,7 @@ int limiter(int n, int lowerBound) {
 
 void moveDegrees(int degrees) { //Positive degrees turns left
 	SensorValue[leftEnc] = 0;
-  SensorValue[rightEnc] = 0;
+  	SensorValue[rightEnc] = 0;
 	baseTicks = 3.3 * degrees;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = - SensorValue[leftEnc] - baseTicks;
@@ -368,6 +368,7 @@ void moveArm(int degrees) { //Positive moves arm up
 }
 
 task armControl() {
+	/*
 	while(true) {
 	if(vexRT[Btn6DXmtr2] == 1) {
 			motor[arm] = -100;
@@ -378,7 +379,7 @@ task armControl() {
 		else {
 			motor[arm] = 0;
 		}
-/*
+	*/
 	leftArmState = SensorValue[leftArmPot];
 	rightArmState = SensorValue[rightArmPot];
 	while(true) {
@@ -393,6 +394,7 @@ task armControl() {
 
 		leftPower = (int)((leftArmState - SensorValue[leftArmPot])/4);
 		rightPower = (int)((SensorValue[rightArmPot] - rightArmState)/4);
+		
 		if(leftPower > 127) {
 			leftPower = 127;
 		}
@@ -406,17 +408,17 @@ task armControl() {
 		else if(rightPower < -127) {
 			rightPower = -127;
 		}
+		
 		int avgPower = (int)((rightPower + leftPower)/2);
 
-		if(abs(avgPower) < 30) {
+		if(abs(avgPower) < 10) {
 			avgPower = 0;
 		}
-		else if(abs(avgPower) < 50) {
+		else if(abs(avgPower) < 30) {
 			avgPower = 20;
 		}
 
 		motor[arm] = avgPower;
-		*/
 	} 
 }
 
