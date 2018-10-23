@@ -32,6 +32,7 @@ void moveInches(int inches); //Positive inches moves forward
 task intakeControl();
 void toggleIntakeDown();
 void toggleIntakeUp();
+void toggleIntakeOff();
 
 task clawControl();
 void moveClaw(int degrees);//Positive moves claw up
@@ -40,10 +41,8 @@ task armControl();
 void moveArm(int degrees); //Positive moves arm up
 
 int clawState;
-int leftArmState;
-int rightArmState;
-int leftPower;
-int rightPower;
+int armState;
+int armPower;
 int intakeUpState;
 int intakeDownState;
 int rightBasePower;
@@ -285,12 +284,16 @@ void moveDegrees(int degrees) { //Positive degrees turns left
 			rightBasePower = baseTicks - SensorValue[rightEnc];
 			leftBasePower = - SensorValue[leftEnc] - baseTicks;
 	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
 }
 
 void moveInches(int inches) { //Positive power moves forward
 	SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
-	baseTicks = 20 * inches;
+	baseTicks = 21 * inches;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = baseTicks - SensorValue[leftEnc];
 	int lowerBound = 30;
@@ -302,36 +305,48 @@ void moveInches(int inches) { //Positive power moves forward
 			rightBasePower = baseTicks - SensorValue[rightEnc];
 			leftBasePower = baseTicks - SensorValue[leftEnc];
 	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
 }
 
 void nAutonomous(){
-	moveDegrees(-30);
+	startTask(intakeControl);
+  startTask(clawControl);
+  startTask(armControl);
 	moveInches(-12);
-	moveClaw(-135);
-	moveInches(12);
-	motor[mangonel] = 127;
 	wait1Msec(0500);
-	while(SensorValue[limitSwitch] != 1) {
-		//Do nothing
+	moveArm(10);
+	moveClaw(-130);
+	wait1Msec(0500);
+	moveInches(20);
+	wait1Msec(0500);
+	moveDegrees(15);
+	wait1Msec(0500);
+	while(SensorValue[limitSwitch] == 1) {
+		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
-	moveDegrees(30);
 	moveInches(36);
+	wait1Msec(0500);
+	moveDegrees(-15);
+	wait1Msec(0250);
 	moveInches(-36);
-	moveDegrees(90);
+	/*
+	moveDegrees(-90);
 	moveInches(-36);
 	toggleIntakeUp();
 	while(SensorValue[intakeLimit] != 1) {
 		//Do nothing
 	}
-	toggleIntakeDown();
-	moveInches(-12);
-	toggleIntakeDown(); //Turn intake off
-	moveInches(48);
+	toggleIntakeOff(); //Turn intake off
+	moveInches(36);
+	*/
 }
 
 void moveClaw(int degrees) { //Positive moves claw up
-	clawState = clawState + 3 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
+	clawState = clawState + 4 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
 }
 
 task clawControl() {
@@ -363,8 +378,7 @@ task clawControl() {
 }
 
 void moveArm(int degrees) { //Positive moves arm up
-	leftArmState = leftArmState + 10 * degrees; //around 10 potentiometer ticks per degree (according to calculations)
-	rightArmState = rightArmState - 10 * degrees;
+	armState = armState + 10 * degrees; //around 10 potentiometer ticks per degree (according to calculations)
 }
 
 task armControl() {
@@ -380,8 +394,8 @@ task armControl() {
 			motor[arm] = 0;
 		}
 	*/
-	leftArmState = SensorValue[leftArmPot];
-	rightArmState = SensorValue[rightArmPot];
+	armState = SensorValue[leftArmPot];
+
 	while(true) {
 		if(vexRT[Btn6DXmtr2] == 1) {
 			moveArm(-3);
@@ -392,33 +406,18 @@ task armControl() {
 			wait1Msec(0050);
 		}
 
-		leftPower = (int)((leftArmState - SensorValue[leftArmPot])/4);
-		rightPower = (int)((SensorValue[rightArmPot] - rightArmState)/4);
+		armPower = (int)((armState - SensorValue[leftArmPot])/4);
+		armPower = limiter(armPower,10);
 		
-		if(leftPower > 127) {
-			leftPower = 127;
-		}
-		else if(leftPower < -127) {
-			leftPower = -127;
-		}
-
-		if(rightPower > 127) {
-			rightPower = 127;
-		}
-		else if(rightPower < -127) {
-			rightPower = -127;
-		}
 		
-		int avgPower = (int)((rightPower + leftPower)/2);
-
-		if(abs(avgPower) < 10) {
-			avgPower = 0;
+		if(armPower < 30 && armPower > 0) {
+			armPower = 20;
 		}
-		else if(abs(avgPower) < 30) {
-			avgPower = 20;
+		else if(armPower < 0 && armPower > -30) {
+			armPower = -20;
 		}
 
-		motor[arm] = avgPower;
+		motor[arm] = armPower;
 	} 
 }
 
@@ -434,6 +433,11 @@ void toggleIntakeDown() {
 	if(intakeUpState == 1) {
 		intakeUpState = intakeUpState * -1;
 		}
+}
+
+void toggleIntakeOff() {
+	intakeUpState = -1;
+  intakeDownState = -1;
 }
 
 task intakeControl(){
