@@ -28,6 +28,7 @@
 void nAutonomous();
 void moveDegrees(int degrees); //Positive degrees turn left
 void moveInches(int inches); //Positive inches moves forward
+void moveTicks(int rightTicks, int leftTicks);
 
 task intakeControl();
 void toggleIntakeDown();
@@ -47,6 +48,8 @@ int intakeUpState;
 int intakeDownState;
 int rightBasePower;
 int leftBasePower;
+int needRightTicks;
+int needLeftTicks;
 float baseTicks;
 
 void pre_auton()
@@ -233,14 +236,13 @@ task usercontrol()
 	      	//=======================MANGONEL CONTROL (MAIN JOYSTICK)===================
 		if(vexRT[Btn5U]==1) {
 			motor[mangonel] = 127;
-			mangonelState = 1;
+			wait1Msec(0500);
 		}
-		else if(mangonelState == 1 && SensorValue[limitSwitch] != 1) {
+		else if(SensorValue[limitSwitch] != 1) {
 			motor[mangonel] = 127;
 		}
-		else if((SensorValue[limitSwitch] == 1 || vexRT[Btn5D] == 1) && vexRT[Btn6U] != 1) { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
+		else { //"Else if" due to conflicts with Btn6U in intake section; can't be left as just an "else" statement
 			motor[mangonel] = 0;
-			mangonelState = 0;
 		}
 	} //end of while loop
 }
@@ -311,6 +313,62 @@ void moveInches(int inches) { //Positive power moves forward
 	motor[left2] = 0;
 }
 
+void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
+	SensorValue[leftEnc] = 0;
+  SensorValue[rightEnc] = 0;
+	needRightTicks = 11;
+	needLeftTicks = 11;
+	int lowerBound = 0;
+	
+	if(abs(rightTicks) < abs(leftTicks)) {
+		float ratio = rightTicks / leftTicks;
+		if(rightTicks > 0 || leftTicks > 0) { 
+			rightBasePower = (int) (127 * ratio);
+			leftBasePower = 127;
+		}
+		else {
+			rightBasePower = (int) (-127 * ratio);
+			leftBasePower = -127;
+		}
+	}
+	else {
+		float ratio = leftTicks / rightTicks;
+		if(rightTicks > 0 || leftTicks > 0) { 
+			leftBasePower = (int) (127 * ratio);
+			rightBasePower = 127;
+		}
+		else {
+			leftBasePower = (int) (-127 * ratio);
+			rightBasePower = -127;
+		}
+	}
+	
+	while(abs(needRightTicks) > 10 || abs(needLeftTicks) > 10) {
+			needRightTicks = rightTicks - SensorValue[rightEnc];
+			needLeftTicks = leftTicks - SensorValue[leftEnc];
+			if(abs(needRightTicks) < 10) {
+				motor[right] = 0;
+				motor[right2] = 0;
+			}
+			else {
+				motor[right] = limiter(rightBasePower,lowerBound);
+				motor[right2] = limiter(rightBasePower,lowerBound);
+			}
+			if(abs(needLeftTicks) < 10) {
+				motor[left] = 0;
+				motor[left2] = 0;
+			}
+			else {
+				motor[left] = limiter(leftBasePower,lowerBound);
+				motor[left2] = limiter(leftBasePower,lowerBound);
+			}
+	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
+}
+
 void nAutonomous(){
 	startTask(intakeControl);
   startTask(clawControl);
@@ -322,7 +380,7 @@ void nAutonomous(){
 	wait1Msec(0500);
 	moveInches(20);
 	wait1Msec(0500);
-	moveDegrees(15);
+	moveDegrees(13);
 	wait1Msec(0500);
 	while(SensorValue[limitSwitch] == 1) {
 		motor[mangonel] = 127;
@@ -330,12 +388,13 @@ void nAutonomous(){
 	motor[mangonel] = 0;
 	moveInches(36);
 	wait1Msec(0500);
-	moveDegrees(-15);
+	moveDegrees(-13);
 	wait1Msec(0250);
-	moveInches(-36);
+	SensorValue[rightEnc] = 0;
+	SensorValue[leftEnc] = 0;
+	moveTicks(-880,-500);
+	moveTicks(-820,-600);
 	/*
-	moveDegrees(-90);
-	moveInches(-36);
 	toggleIntakeUp();
 	while(SensorValue[intakeLimit] != 1) {
 		//Do nothing
@@ -389,7 +448,7 @@ task armControl() {
 		}
 		else if(vexRT[Btn6UXmtr2] == 1) {
 			motor[arm] = 100;
-		}	
+		}
 		else {
 			motor[arm] = 0;
 		}
@@ -408,8 +467,8 @@ task armControl() {
 
 		armPower = (int)((armState - SensorValue[leftArmPot])/4);
 		armPower = limiter(armPower,10);
-		
-		
+
+
 		if(armPower < 30 && armPower > 0) {
 			armPower = 20;
 		}
@@ -418,7 +477,7 @@ task armControl() {
 		}
 
 		motor[arm] = armPower;
-	} 
+	}
 }
 
 void toggleIntakeUp() {
@@ -442,35 +501,43 @@ void toggleIntakeOff() {
 
 task intakeControl(){
 	intakeUpState = -1;
-  	intakeDownState = -1;
+  intakeDownState = -1;
 	int ball = 0;
+	int ballButton = 0;
 
 	while(true){
-		if(vexRT[Btn6U] == 1) {
+		if(vexRT[Btn6U] == 1 && ballButton == 0) {
 			toggleIntakeUp();
-			wait1Msec(0100);
+			ballButton = 1;
+			ball = 1;
 		}
-		else if(vexRT[Btn6D] == 1) {
+		else if(vexRT[Btn6D] == 1 && ballButton == 0) {
 			toggleIntakeDown();
-			wait1Msec(0100);
+			ballButton = 1;
+			ball = 1;
+		}
+		else if(vexRT[Btn6D] == 0 && vexRT[Btn6U] == 0){
+			ballButton = 0;
 		}
 
 		if(SensorValue[intakeLimit] == 1 && ball == 0) {
 			ball = 1;
-  			intakeUpState = -1;
-  			intakeDownState = -1;
+  		intakeUpState = -1;
+  		intakeDownState = -1;
 			motor[intake] = 0;
 
 		}
 		else if(intakeUpState == 1){
 			motor[intake] = 127;
-			ball = 0;
-			wait1Msec(0200);
+			if(SensorValue[intakeLimit] == 0) {
+				ball = 0;
+			}
 		}
 		else if(intakeDownState == 1){
 			motor[intake] = -127;
-			ball = 0;
-			wait1Msec(0200);
+			if(SensorValue[intakeLimit] == 0) {
+				ball = 0;
+			}
 		}
 		else{
 			motor[intake] = 0;
