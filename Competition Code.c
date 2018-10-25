@@ -51,6 +51,7 @@ int leftBasePower;
 int needRightTicks;
 int needLeftTicks;
 float baseTicks;
+float ratio;
 
 void pre_auton()
 {
@@ -143,10 +144,12 @@ task usercontrol()
 			nAutonomous();
 		}
 		else if(vexRT[Btn7R] == 1) {
-			moveDegrees(-90);
+			moveTicks(-880,-500);
+			moveTicks(-820,-600);
 		}
 		else if(vexRT[Btn7L] == 1) {
-			moveDegrees(90);
+			moveTicks(880,500);
+			moveTicks(820,600);
 		}
 		else if(vexRT[Btn7RXmtr2] == 1) {
 			moveInches(24);
@@ -316,12 +319,12 @@ void moveInches(int inches) { //Positive power moves forward
 void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 	SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
-	needRightTicks = 11;
-	needLeftTicks = 11;
-	int lowerBound = 0;
+	needRightTicks = rightTicks - SensorValue[rightEnc];
+	needLeftTicks = leftTicks - SensorValue[leftEnc];
+	int lowerBound = -127;
 	
 	if(abs(rightTicks) < abs(leftTicks)) {
-		float ratio = rightTicks / leftTicks;
+		ratio = (float)(abs(rightTicks))/(float)(abs(leftTicks));
 		if(rightTicks > 0 || leftTicks > 0) { 
 			rightBasePower = (int) (127 * ratio);
 			leftBasePower = 127;
@@ -332,7 +335,7 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 		}
 	}
 	else {
-		float ratio = leftTicks / rightTicks;
+		ratio = (float)(abs(leftTicks))/(float)(abs(rightTicks));
 		if(rightTicks > 0 || leftTicks > 0) { 
 			leftBasePower = (int) (127 * ratio);
 			rightBasePower = 127;
@@ -343,20 +346,29 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 		}
 	}
 	
-	while(abs(needRightTicks) > 10 || abs(needLeftTicks) > 10) {
+	while(abs(needRightTicks) > 30 || abs(needLeftTicks) > 30) {
 			needRightTicks = rightTicks - SensorValue[rightEnc];
 			needLeftTicks = leftTicks - SensorValue[leftEnc];
 			if(abs(needRightTicks) < 10) {
 				motor[right] = 0;
 				motor[right2] = 0;
 			}
+			else if(abs(needRightTicks) < 127) {
+				motor[right] = needRightTicks;
+				motor[right2] = needRightTicks;
+			}
 			else {
 				motor[right] = limiter(rightBasePower,lowerBound);
 				motor[right2] = limiter(rightBasePower,lowerBound);
 			}
+			
 			if(abs(needLeftTicks) < 10) {
 				motor[left] = 0;
 				motor[left2] = 0;
+			}
+			else if(abs(needLeftTicks) < 127) {
+				motor[left] = needLeftTicks;
+				motor[left2] = needLeftTicks;
 			}
 			else {
 				motor[left] = limiter(leftBasePower,lowerBound);
