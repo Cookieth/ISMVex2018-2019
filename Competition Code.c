@@ -322,53 +322,41 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 	needRightTicks = rightTicks - SensorValue[rightEnc];
 	needLeftTicks = leftTicks - SensorValue[leftEnc];
 	int lowerBound = -127;
+	int n = 0;
+	
+	if(rightTicks < 0 || leftTicks < 0) {
+		n = -1;
+	}
+	else {
+		n = 1;
+	}
 	
 	if(abs(rightTicks) < abs(leftTicks)) {
 		ratio = (float)(abs(rightTicks))/(float)(abs(leftTicks));
-		if(rightTicks > 0 || leftTicks > 0) { 
-			rightBasePower = (int) (127 * ratio);
-			leftBasePower = 127;
-		}
-		else {
-			rightBasePower = (int) (-127 * ratio);
-			leftBasePower = -127;
-		}
+		rightBasePower = n * (int)(127*ratio);
+		leftBasePower = n * 127;
 	}
 	else {
 		ratio = (float)(abs(leftTicks))/(float)(abs(rightTicks));
-		if(rightTicks > 0 || leftTicks > 0) { 
-			leftBasePower = (int) (127 * ratio);
-			rightBasePower = 127;
-		}
-		else {
-			leftBasePower = (int) (-127 * ratio);
-			rightBasePower = -127;
-		}
+		rightBasePower = n * 127;
+		leftBasePower = n * (int)(127*ratio);
 	}
 	
-	while(abs(needRightTicks) > 30 || abs(needLeftTicks) > 30) {
+	while((n == 1 && (needRightTicks > 30 || needLeftTicks > 30)) || (n == -1 && (needRightTicks < -30 || needLeftTicks < -30))) {
 			needRightTicks = rightTicks - SensorValue[rightEnc];
 			needLeftTicks = leftTicks - SensorValue[leftEnc];
-			if(abs(needRightTicks) < 10) {
+			if((n == 1 && needRightTicks < 30)||(n == -1 && needRightTicks > -30)) {
 				motor[right] = 0;
 				motor[right2] = 0;
-			}
-			else if(abs(needRightTicks) < 127) {
-				motor[right] = needRightTicks;
-				motor[right2] = needRightTicks;
 			}
 			else {
 				motor[right] = limiter(rightBasePower,lowerBound);
 				motor[right2] = limiter(rightBasePower,lowerBound);
 			}
 			
-			if(abs(needLeftTicks) < 10) {
+			if((n == 1 && needLeftTicks < 30)||(n == -1 && needLeftTicks > -30)) {
 				motor[left] = 0;
 				motor[left2] = 0;
-			}
-			else if(abs(needLeftTicks) < 127) {
-				motor[left] = needLeftTicks;
-				motor[left2] = needLeftTicks;
 			}
 			else {
 				motor[left] = limiter(leftBasePower,lowerBound);
@@ -422,15 +410,19 @@ void moveClaw(int degrees) { //Positive moves claw up
 
 task clawControl() {
 	clawState = 0;
+	int clawButton = 0;
 	SensorValue[clawEnc] = 0;
 	while(true) {
-		if(vexRT[Btn5DXmtr2] == 1) {
+		if(vexRT[Btn5DXmtr2] == 1 && clawButton == 0) {
 			moveClaw(-30);
-			wait1Msec(0100);
+			clawButton = 1;
 		}
-		else if(vexRT[Btn5UXmtr2] == 1) {
+		else if(vexRT[Btn5UXmtr2] == 1 && clawButton == 0) {
 			moveClaw(30);
-			wait1Msec(0100);
+			clawButton = 1;
+		}
+		else if(vexRT[Btn5DXmtr2] == 0 && vexRT[Btn5UXmtr2] == 0){
+			clawButton = 0;
 		}
 
 		int power = (int)((clawState - SensorValue[clawEnc])/3);
@@ -453,28 +445,19 @@ void moveArm(int degrees) { //Positive moves arm up
 }
 
 task armControl() {
-	/*
-	while(true) {
-	if(vexRT[Btn6DXmtr2] == 1) {
-			motor[arm] = -100;
-		}
-		else if(vexRT[Btn6UXmtr2] == 1) {
-			motor[arm] = 100;
-		}
-		else {
-			motor[arm] = 0;
-		}
-	*/
 	armState = SensorValue[leftArmPot];
-
+	int armButton = 0;
 	while(true) {
-		if(vexRT[Btn6DXmtr2] == 1) {
+		if(vexRT[Btn6DXmtr2] == 1 && armButton == 0) {
 			moveArm(-3);
-			wait1Msec(0050);
+			armButton = 1;
 		}
-		else if(vexRT[Btn6UXmtr2] == 1) {
+		else if(vexRT[Btn6UXmtr2] == 1 && armButton == 0) {
 			moveArm(3);
-			wait1Msec(0050);
+			armButton = 1;
+		}
+		else if(vexRT[Btn6DXmtr2] == 0 && vexRT[Btn6UXmtr2] == 0) {
+			armButton = 0;
 		}
 
 		armPower = (int)((armState - SensorValue[leftArmPot])/4);
