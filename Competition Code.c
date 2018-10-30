@@ -25,6 +25,8 @@
 
 #define abs(X) ((X < 0) ? -1 * X : X)
 
+task autonControl();
+
 void nAutonomous();
 void moveDegrees(int degrees); //Positive degrees turn left
 void moveInches(int inches); //Positive inches moves forward
@@ -37,20 +39,26 @@ void toggleIntakeOff();
 
 void clawControl();
 void moveClaw(int degrees);//Positive moves claw up
+void autoMoveClaw(int degrees);
 
 void armControl();
 void moveArm(int degrees); //Positive moves arm up
+void autoMoveArm(int degrees); //Moves up only
 
 int clawState;
 int clawButton;
+int clawPower;
+
 int rightArmState;
 int leftArmState;
 int rightArmPower;
 int leftArmPower;
-int avgPower;
+int armPower;
 int armButton;
+
 int intakeUpState;
 int intakeDownState;
+
 int rightBasePower;
 int leftBasePower;
 int needRightTicks;
@@ -113,7 +121,7 @@ task autonomous()
 // Btn6DXmtr2: Arm
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
-// Btn7LXmtr2:
+// Btn7LXmtr2: Potentiometer Holder --> Repositions target potentiometer values
 // Btn7RXmtr2:
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
@@ -158,18 +166,6 @@ task usercontrol()
 		armControl();
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
 			nAutonomous();
-		}
-		else if(vexRT[Btn7R] == 1) {
-			moveClaw(30);
-		}
-		else if(vexRT[Btn7L] == 1) {
-			moveClaw(-30);
-		}
-		else if(vexRT[Btn7RXmtr2] == 1) {
-			moveInches(24);
-		}
-		else if(vexRT[Btn7LXmtr2] == 1) {
-			moveInches(-24);
 		}
 
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
@@ -384,13 +380,10 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 }
 
 void nAutonomous(){
-	//startTask(intakeControl);
-  //startTask(clawControl);
-  //startTask(armControl);
+	startTask(autonControl);
 	moveInches(-12);
-	wait1Msec(0500);
-	moveArm(10);
-	moveClaw(-130);
+	autoMoveArm(10);
+	autoMoveClaw(-130);
 	wait1Msec(0500);
 	moveInches(20);
 	wait1Msec(0500);
@@ -418,6 +411,13 @@ void nAutonomous(){
 	*/
 }
 
+void autoMoveClaw(int degrees) {
+	moveClaw(degrees);
+	while(clawPower != 0) {
+		wait1Msec(0001);
+	}
+}
+
 void moveClaw(int degrees) { //Positive moves claw up
 	clawState = clawState + 4 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
 }
@@ -435,18 +435,16 @@ void clawControl() {
 			clawButton = 0;
 		}
 
-		int power = (int)((clawState - SensorValue[clawEnc])/3);
-		if(power > 127) {
-			power = 127;
-		}
-		else if(power < -127) {
-			power = -127;
-		}
-		else if(abs(power) < 10) {
-			power = 0;
-		}
+		clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
 
-		motor[claw] = power;
+		motor[claw] = clawPower;
+}
+
+void autoMoveArm(int degrees) { //Only goes up
+	moveArm(degrees);
+	while(armPower != 0) {
+		wait1Msec(0001);
+	}
 }
 
 void moveArm(int degrees) { //Positive moves arm up
@@ -455,32 +453,43 @@ void moveArm(int degrees) { //Positive moves arm up
 }
 
 void armControl() {
-	leftArmState = SensorValue[leftArmPot];
-	rightArmState = SensorValue[rightArmPot];
 		if(vexRT[Btn6DXmtr2] == 1) {
-			moveArm(-3);
-			wait1Msec(0050);
+			motor[arm] = -127;
+			armButton = 0;
 		}
 		else if(vexRT[Btn6UXmtr2] == 1) {
-			moveArm(3);
-			wait1Msec(0050);
+			motor[arm] = 127;
+			armButton = 0;
 		}
-
-		leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])/4),-127);
-		rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)/4),-127);
-		avgPower = (int)((rightArmPower + leftArmPower)/2);
-
-		if(abs(avgPower) < 10) {
-			avgPower = 0;
+		else if(vexRT[Btn6DXmtr2] == 0 && vexRT[Btn6UXmtr2] == 0) {
+			if(armButton == 0) {
+				leftArmState = SensorValue[leftArmPot];
+				rightArmState = SensorValue[rightArmPot];
+				armButton = 1;
+			}
+			
+			if(vexRT[Btn7LXmtr2] == 0) {
+				leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])),15);
+				rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)),15);
+				if(leftArmPower > rightArmPower) {
+					armPower = leftArmPower;
+				}
+				else {
+					armPower = rightArmPower;
+				}
+			
+				if(armPower < 15) {
+					armPower = 0;
+				}
+	
+				motor[arm] = armPower;
+			}
+			else {
+				motor[arm] = 0;
+				leftArmState = SensorValue[leftArmPot];
+				rightArmState = SensorValue[rightArmPot];
+			}
 		}
-		else if(avgPower > 0 && avgPower < 30) {
-			avgPower = 20;
-		}
-		else if(avgPower < 0 && avgPower > -30) {
-			avgPower = -20;
-		}
-
-		motor[arm] = avgPower;
 }
 
 void toggleIntakeUp() {
@@ -539,4 +548,12 @@ void intakeControl(){
 		else{
 			motor[intake] = 0;
 		}
+}
+
+task autonControl() {
+	while(true) {
+		intakeControl();
+		clawControl();
+		armControl();
+	}
 }
