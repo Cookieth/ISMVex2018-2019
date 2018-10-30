@@ -122,7 +122,7 @@ task autonomous()
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
 // Btn7LXmtr2: Potentiometer Holder --> Repositions target potentiometer values
-// Btn7RXmtr2:
+// Btn7RXmtr2: Claw Enc Reset
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
@@ -148,7 +148,7 @@ task usercontrol()
   SensorValue[leftEnc] = 0;
   SensorValue[rightEnc] = 0;
   SensorValue[clawEnc] = 0;
-  
+
   intakeUpState = -1;
   intakeDownState = -1;
 	ball = 0;
@@ -333,14 +333,14 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 	needLeftTicks = leftTicks - SensorValue[leftEnc];
 	int lowerBound = -127;
 	int n = 0;
-	
+
 	if(rightTicks < 0 || leftTicks < 0) {
 		n = -1;
 	}
 	else {
 		n = 1;
 	}
-	
+
 	if(abs(rightTicks) < abs(leftTicks)) {
 		ratio = (float)(abs(rightTicks))/(float)(abs(leftTicks));
 		rightBasePower = n * (int)(127*ratio);
@@ -351,7 +351,7 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 		rightBasePower = n * 127;
 		leftBasePower = n * (int)(127*ratio);
 	}
-	
+
 	while((n == 1 && (needRightTicks > 30 || needLeftTicks > 30)) || (n == -1 && (needRightTicks < -30 || needLeftTicks < -30))) {
 			needRightTicks = rightTicks - SensorValue[rightEnc];
 			needLeftTicks = leftTicks - SensorValue[leftEnc];
@@ -363,7 +363,7 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive power moves forward
 				motor[right] = limiter(rightBasePower,lowerBound);
 				motor[right2] = limiter(rightBasePower,lowerBound);
 			}
-			
+
 			if((n == 1 && needLeftTicks < 30)||(n == -1 && needLeftTicks > -30)) {
 				motor[left] = 0;
 				motor[left2] = 0;
@@ -409,6 +409,7 @@ void nAutonomous(){
 	toggleIntakeOff(); //Turn intake off
 	moveInches(36);
 	*/
+	stopTask(autonControl);
 }
 
 void autoMoveClaw(int degrees) {
@@ -433,6 +434,10 @@ void clawControl() {
 		}
 		else if(vexRT[Btn5DXmtr2] == 0 && vexRT[Btn5UXmtr2] == 0){
 			clawButton = 0;
+		}
+
+		if(vexRT[Btn7RXmtr2] == 1) {
+			SensorValue[clawEnc] = 0;
 		}
 
 		clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
@@ -467,7 +472,7 @@ void armControl() {
 				rightArmState = SensorValue[rightArmPot];
 				armButton = 1;
 			}
-			
+
 			if(vexRT[Btn7LXmtr2] == 0) {
 				leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])),15);
 				rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)),15);
@@ -477,11 +482,11 @@ void armControl() {
 				else {
 					armPower = rightArmPower;
 				}
-			
+
 				if(armPower < 15) {
 					armPower = 0;
 				}
-	
+
 				motor[arm] = armPower;
 			}
 			else {
