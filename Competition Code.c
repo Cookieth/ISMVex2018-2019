@@ -441,16 +441,17 @@ void cntrlMoveArm() {
 	}
 	else if(vexRT[Btn6UXmtr2] == 1) {
 		motor[arm] = 127;
-		armButton = 0;
+		armButton = 2;
 	}
 	else if(vexRT[Btn6DXmtr2] == 0 && vexRT[Btn6UXmtr2] == 0) {
-		if(armButton == 0) {
+
+		if(armButton == 2) {
 			leftArmState = SensorValue[leftArmPot];
 			rightArmState = SensorValue[rightArmPot];
 			armButton = 1;
 		}
 
-		if(vexRT[Btn7LXmtr2] == 0) {
+		if(armButton == 1) {
 			leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])),15);
 			rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)),15);
 			if(leftArmPower > rightArmPower) {
@@ -467,7 +468,6 @@ void cntrlMoveArm() {
 			motor[arm] = armPower;
 		}
 		else {
-			motor[arm] = 0;
 			leftArmState = SensorValue[leftArmPot];
 			rightArmState = SensorValue[rightArmPot];
 		}
