@@ -122,8 +122,8 @@ task autonomous()
 // Btn6DXmtr2: Arm
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
-// Btn7LXmtr2: Potentiometer Holder --> Repositions target potentiometer values
-// Btn7RXmtr2: Claw Enc Reset
+// Btn7LXmtr2: Claw Enc Reset
+// Btn7RXmtr2: 
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
@@ -209,11 +209,11 @@ task usercontrol()
 			motor[right] = trueCh2;
 			motor[right2] = trueCh2;
 		}
-		else if(trueCh2 > 10 && trueCh2 < threshold){
+		else if(trueCh2 > 20 && trueCh2 < threshold){
 			motor[right] = threshold;
 			motor[right2] = threshold;
 		}
-		else if(trueCh2 < -10 && trueCh2 > (-threshold)){
+		else if(trueCh2 < -20 && trueCh2 > (-threshold)){
 			motor[right] = -threshold;
 			motor[right2] = -threshold;
 		}
@@ -257,26 +257,26 @@ task usercontrol()
 //                                A U T O N O M O U S   C O N T R O L   S E C T I O N
 //				Functions:
 //				Base Methods
-//					moveDegrees		- 297 positive degrees turns counterclockwise (waits until completed)
-//					moveInches		- 318 positive moves forward (waits until completed)
-//					moveTicks		- 339 positive moves forward (waits until completed)
+//					moveDegrees			- 297 positive degrees turns counterclockwise (waits until completed)
+//					moveInches			- 318 positive moves forward (waits until completed)
+//					moveTicks				- 339 positive moves forward (waits until completed)
 //				Claw Methods
-//					autoMoveClaw	- 392 positive degrees turns claw upwards (waits until completed)
-//					moveClaw 		- 399 positive degrees turns claw upwards
-//					cntrlMoveClaw	- 403 remote control
+//					autoMoveClaw		- 392 positive degrees turns claw upwards (waits until completed)
+//					moveClaw 				- 399 positive degrees turns claw upwards
+//					cntrlMoveClaw		- 409 remote control
 //				Arm Methods
-//					autoMoveArm		- 425 positive degrees turns claw upwards (waits until completed)
-//					moveArm 		- 432 positive degrees turns claw upwards
-//					cntrlMoveArm	- 437 remote control
+//					autoMoveArm			- 431 positive degrees turns claw upwards (waits until completed)
+//					moveArm 				- 438 positive degrees turns claw upwards
+//					cntrlMoveArm		- 442 remote control
 //				Intake Methods
-//					toggleIntakeUp	- 477 intake up or off
-//					toggleIntakeDown- 484 intake down or off
-//					toggleIntakeOff	- 491 intake off
-//					cntrlMoveIntake	- 496 remote control
+//					toggleIntakeUp	- 484 intake up or off
+//					toggleIntakeDown- 491 intake down or off
+//					toggleIntakeOff	- 498 intake off
+//					cntrlMoveIntake	- 503 remote control
 //				Auton Methods
-//					cntrlMoveAuton 	- 535 autonomous task
-//					oAutonomous		- 543 old autonomous code
-//					nAutonomous 	- 574 incomplete new autonomous code
+//					cntrlMoveAuton 	- 542 autonomous task
+//					oAutonomous			- 550 old autonomous code
+//					nAutonomous 		- 581 incomplete new autonomous code
 //280---------------------------------------------------------------------------------------------------------------
 
 int limiter(int n, int lowerBound) {
@@ -398,6 +398,12 @@ void autoMoveClaw(int degrees) {
 
 void moveClaw(int degrees) { //Positive moves claw up
 	clawState = clawState + 4 * degrees; //around 5 potentiometer ticks per degree (according to calculations)
+	if(clawState > 0) {
+		clawState = 0;
+	}
+	else if(clawState < -1080) {
+		clawState = -1080;
+	}
 }
 
 void cntrlMoveClaw() {
@@ -413,7 +419,7 @@ void cntrlMoveClaw() {
 		clawButton = 0;
 	}
 
-	if(vexRT[Btn7RXmtr2] == 1) {
+	if(vexRT[Btn7LXmtr2] == 1) {
 		SensorValue[clawEnc] = 0;
 	}
 
@@ -436,14 +442,14 @@ void moveArm(int degrees) { //Positive moves arm up
 
 void cntrlMoveArm() {
 	if(vexRT[Btn6DXmtr2] == 1) {
-		motor[arm] = -127;
+		motor[arm] = -60;
 		armButton = 0;
 	}
 	else if(vexRT[Btn6UXmtr2] == 1) {
 		motor[arm] = 127;
 		armButton = 2;
 	}
-	else if(vexRT[Btn6DXmtr2] == 0 && vexRT[Btn6UXmtr2] == 0) {
+	else {
 
 		if(armButton == 2) {
 			leftArmState = SensorValue[leftArmPot];
@@ -470,6 +476,7 @@ void cntrlMoveArm() {
 		else {
 			leftArmState = SensorValue[leftArmPot];
 			rightArmState = SensorValue[rightArmPot];
+			motor[arm] = 0;
 		}
 	}
 }
@@ -575,15 +582,15 @@ void nAutonomous() {
 	//CURRENTLY, THE AUTONOMUS IS MEANT TO COMPLETE SKILLS AUTON FOR ONE SIDE
 	//CAN BE BROKEN DOWN TO TO ITS COMPONENT PARTS (FLAG TILE AND CAP TILE) FOR SKILLS
 	int r = 0;
-	if(SensorValue[potentiometer] < 1000) {
+	if(SensorValue[autonPot] < 1000) {
 		r = -1;
   	}
-	else if(SensorValue[potentiometer] > 1000 && SensorValue[potentiometer] < 3000) {
+  else if(SensorValue[autonPot] > 1000 && SensorValue[autonPot] < 3000) {
 		//SKILLS AUTON
 	}
-  	else if(SensorValue[potentiometer] > 3000) {
+  else if(SensorValue[autonPot] > 3000) {
 		r = 1;
-  	}
+  }
 
   	//FLAG TILE
 	startTask(moveAuton);
