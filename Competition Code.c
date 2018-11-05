@@ -29,6 +29,8 @@ task moveAuton();
 void oAutonomous();
 void nAutonomous();
 
+void moveToDistance(int rightDist, int leftDist);
+void ctrlMoveToDistance(int rightDist, int leftDist);
 void moveDegrees(int degrees);
 void moveInches(int inches);
 void moveTicks(int rightTicks, int leftTicks);
@@ -100,9 +102,9 @@ task autonomous()
 // Btn6D: Intake
 // Btn7U: Auton Tester
 // Btn7D: Switch Controller
-// Btn7L:
-// Btn7R:
-// Btn8U:
+// Btn7L: Aim for Low Flag
+// Btn7R: Aim for High Flag
+// Btn8U: Cancel any Aiming
 // Btn8D: Switch Direction
 // Btn8L: Change "Gear"
 // Btn8R: Change "Gear"
@@ -122,9 +124,9 @@ task autonomous()
 // Btn6DXmtr2: Arm
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
-// Btn7LXmtr2: Claw Enc Reset
-// Btn7RXmtr2:
-// Btn8UXmtr2:
+// Btn7LXmtr2: Aim for Low Post
+// Btn7RXmtr2: Aim for High Post
+// Btn8UXmtr2: Claw Enc Reset
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
 // Btn8RXmtr2: Change "Gear"
@@ -167,13 +169,6 @@ task usercontrol()
 		cntrlMoveArm();
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
 			nAutonomous();
-		}
-		
-		if(vexRT[Btn7R] == 1) {
-			moveDegrees(-90);
-		}
-		else if(vexRT[Btn7L] == 1) {
-			moveDegrees(90);
 		}
 
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
@@ -224,6 +219,18 @@ task usercontrol()
 			motor[right] = -threshold;
 			motor[right2] = -threshold;
 		}
+		else if(vexRT[Btn7L] == 1) {
+			ctrlMoveToDistance(70,70);
+		}
+		else if(vexRT[Btn7R] == 1) {
+			ctrlMoveToDistance(160,160);
+		}
+		else if(vexRT[Btn7LXmtr2] == 1) {
+			ctrlMoveToDistance(24,24);
+		}
+		else if(vexRT[Btn7RXmtr2] == 1) {
+			ctrlMoveToDistance(34,34);
+		}
 		else{
 			motor[right] = 0;
 			motor[right2] = 0;
@@ -259,32 +266,34 @@ task usercontrol()
 		}
 	} //end of while loop
 }
-//255---------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------
 //
 //                                A U T O N O M O U S   C O N T R O L   S E C T I O N
 //				Functions:
 //				Base Methods
-//					moveDegrees			- 297 positive degrees turns counterclockwise (waits until completed)
-//					moveInches			- 318 positive moves forward (waits until completed)
-//					moveTicks				- 339 positive moves forward (waits until completed)
+//					movetoDistance 		- moves robot to a certain distance from the fence
+//					ctrlMoveToDistance 	- moves robot to a certain distance from the fence, cancellable through 8U
+//					moveDegrees			- positive degrees turns counterclockwise (waits until completed)
+//					moveInches			- positive moves forward (waits until completed)
+//					moveTicks				- positive moves forward (waits until completed)
 //				Claw Methods
-//					autoMoveClaw		- 392 positive degrees turns claw upwards (waits until completed)
-//					moveClaw 				- 399 positive degrees turns claw upwards
-//					cntrlMoveClaw		- 409 remote control
+//					autoMoveClaw		- positive degrees turns claw upwards (waits until completed)
+//					moveClaw 				- positive degrees turns claw upwards
+//					cntrlMoveClaw		- remote control
 //				Arm Methods
-//					autoMoveArm			- 431 positive degrees turns claw upwards (waits until completed)
-//					moveArm 				- 438 positive degrees turns claw upwards
-//					cntrlMoveArm		- 442 remote control
+//					autoMoveArm			- positive degrees turns claw upwards (waits until completed)
+//					moveArm 				- positive degrees turns claw upwards
+//					cntrlMoveArm		- remote control
 //				Intake Methods
-//					toggleIntakeUp	- 484 intake up or off
-//					toggleIntakeDown- 491 intake down or off
-//					toggleIntakeOff	- 498 intake off
-//					cntrlMoveIntake	- 503 remote control
+//					toggleIntakeUp	- intake up or off
+//					toggleIntakeDown- intake down or off
+//					toggleIntakeOff	- intake off
+//					cntrlMoveIntake	- remote control
 //				Auton Methods
-//					cntrlMoveAuton 	- 542 autonomous task
-//					oAutonomous			- 550 old autonomous code
-//					nAutonomous 		- 581 incomplete new autonomous code
-//280---------------------------------------------------------------------------------------------------------------
+//					cntrlMoveAuton 	- autonomous task
+//					oAutonomous			- old autonomous code
+//					nAutonomous 		- incomplete new autonomous code
+//---------------------------------------------------------------------------------------------------------------
 
 int limiter(int n, int lowerBound) {
 	if(n > 127) {
@@ -299,6 +308,42 @@ int limiter(int n, int lowerBound) {
 	else {
 		return n;
 	}
+}
+
+void moveToDistance(int rightDist, int leftDist) {
+	rightBasePower = (rightDist - SensorValue[rightSonar])*10;
+	leftBasePower = (leftDist - SensorValue[leftSonar])*10;
+	int lowerBound = 30;
+	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
+		motor[right] = limiter(rightBasePower,lowerBound);
+		motor[right2] = limiter(rightBasePower,lowerBound);
+		motor[left] = limiter(leftBasePower,lowerBound);
+		motor[left2] = limiter(leftBasePower,lowerBound);
+		rightBasePower = baseTicks - SensorValue[rightEnc];
+		leftBasePower = baseTicks - SensorValue[leftEnc];
+	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
+}
+
+void ctrlMoveToDistance(int rightDist, int leftDist) {
+	rightBasePower = (rightDist - SensorValue[rightSonar])*10;
+	leftBasePower = (leftDist - SensorValue[leftSonar])*10;
+	int lowerBound = 30;
+	while((limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) && vexRT[Btn8U] == 0) {
+		motor[right] = limiter(rightBasePower,lowerBound);
+		motor[right2] = limiter(rightBasePower,lowerBound);
+		motor[left] = limiter(leftBasePower,lowerBound);
+		motor[left2] = limiter(leftBasePower,lowerBound);
+		rightBasePower = baseTicks - SensorValue[rightEnc];
+		leftBasePower = baseTicks - SensorValue[leftEnc];
+	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
 }
 
 void moveDegrees(int degrees) { //Positive degrees turns clockwise
@@ -325,7 +370,7 @@ void moveDegrees(int degrees) { //Positive degrees turns clockwise
 void moveInches(int inches) { //Positive moves forward
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
-	baseTicks = 21 * inches;
+	baseTicks = 30 * inches;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = baseTicks - SensorValue[leftEnc];
 	int lowerBound = 30;
@@ -426,8 +471,8 @@ void cntrlMoveClaw() {
 		clawButton = 0;
 	}
 
-	if(vexRT[Btn7LXmtr2] == 1) {
-		SensorValue[clawEnc] = 0;
+	if(vexRT[Btn8UXmtr2] == 1) {
+		SensorValue[clawEnc] = -120;
 	}
 
 	clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
@@ -602,19 +647,20 @@ void nAutonomous() {
   	//FLAG TILE
 	startTask(moveAuton);
 	toggleIntakeUp();						//Pick up ball
-	moveDegrees(10);
-	moveInches(-50);
+	moveDegrees(10); //Something weird happening, robot swings right initially, compensated for
+	moveInches(-36);
 	while(SensorValue[intakeLimit] != 1) {
 		//Do nothing
 	}
 	toggleIntakeOff();
-	moveInches(50);							//Move back to starting tile
+	moveInches(36);							//Move back to starting tile
 	moveDegrees(90*r);						//Turn to face flags
 	moveInches(-12);						//Move into expansion zone
 	autoMoveArm(10);						//Move claw out of the way
 	autoMoveClaw(-130);
 	moveInches(20);
 	moveDegrees(10*r);
+	moveToDistance(160,160);				//Aim for high flag
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
 	}
@@ -626,6 +672,7 @@ void nAutonomous() {
 	toggleIntakeUp();						//Load
 	wait1Msec(2000);
 	moveInches(24);
+	moveToDistance(70,70);					//Aim for low flag
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
 	}
