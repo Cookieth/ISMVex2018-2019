@@ -123,7 +123,7 @@ task autonomous()
 // Btn7UXmtr2: Auton Tester
 // Btn7DXmtr2: Switch Controller
 // Btn7LXmtr2: Claw Enc Reset
-// Btn7RXmtr2: 
+// Btn7RXmtr2:
 // Btn8UXmtr2:
 // Btn8DXmtr2: Switch Direction
 // Btn8LXmtr2: Change "Gear"
@@ -167,6 +167,13 @@ task usercontrol()
 		cntrlMoveArm();
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
 			nAutonomous();
+		}
+		
+		if(vexRT[Btn7R] == 1) {
+			moveDegrees(-90);
+		}
+		else if(vexRT[Btn7L] == 1) {
+			moveDegrees(90);
 		}
 
 		//=======================BASE CONROL (BOTH CONTROLLERS)=======================
@@ -297,7 +304,7 @@ int limiter(int n, int lowerBound) {
 void moveDegrees(int degrees) { //Positive degrees turns clockwise
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
-	baseTicks = 3.3 * degrees;
+	baseTicks = 3.8 * degrees;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = - SensorValue[leftEnc] - baseTicks;
 	int lowerBound = 30;
@@ -578,7 +585,7 @@ void oAutonomous() {
 	*/
 }
 
-void nAutonomous() { 
+void nAutonomous() {
 	//CURRENTLY, THE AUTONOMUS IS MEANT TO COMPLETE SKILLS AUTON FOR ONE SIDE
 	//CAN BE BROKEN DOWN TO TO ITS COMPONENT PARTS (FLAG TILE AND CAP TILE) FOR SKILLS
 	int r = 0;
@@ -595,12 +602,13 @@ void nAutonomous() {
   	//FLAG TILE
 	startTask(moveAuton);
 	toggleIntakeUp();						//Pick up ball
-	moveInches(-36);
+	moveDegrees(10);
+	moveInches(-50);
 	while(SensorValue[intakeLimit] != 1) {
 		//Do nothing
 	}
 	toggleIntakeOff();
-	moveInches(36);							//Move back to starting tile
+	moveInches(50);							//Move back to starting tile
 	moveDegrees(90*r);						//Turn to face flags
 	moveInches(-12);						//Move into expansion zone
 	autoMoveArm(10);						//Move claw out of the way
@@ -615,7 +623,7 @@ void nAutonomous() {
 		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
-	toggleIntakeUp();						//Load						
+	toggleIntakeUp();						//Load
 	wait1Msec(2000);
 	moveInches(24);
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
