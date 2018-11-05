@@ -138,16 +138,17 @@ task autonomous()
 task usercontrol()
 {
 	int driveGear = 1;
+	int driveGearButton = 0;
 	int direction = 1;
+	int directionButton = 0;
 	int driveController = 1;
-	int trueCh2;
-	int trueCh3;
+	int driveControllerButton = 0;
+	int trueCh2 = 0;
+	int trueCh3 = 0;
 	int mangonelState = 0;
 
 	int threshold = 50;
 
-	int lowCapDist = 34;
-	int highCapDist = 24;
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
 	SensorValue[clawEnc] = 0;
@@ -189,22 +190,32 @@ task usercontrol()
 			trueCh3 = (vexRT[Ch2Xmtr2]*direction)/driveGear;
 		}
 
-		if((vexRT[Btn8D] == 1)|| (vexRT[Btn8DXmtr2] == 1)) {
+		if(((vexRT[Btn8D] == 1)|| (vexRT[Btn8DXmtr2] == 1)) && (directionButton == 0)) {
 			direction = direction * -1;
-			wait1Msec(0500);
+			directionButton = 1;
 		}
-		if((vexRT[Btn7D] == 1) || (vexRT[Btn7DXmtr2] == 1)) {
-			driveController = driveController * -1;
-			wait1Msec(0500);
+		else {
+			directionButton = 0;
 		}
 
-		if(((vexRT[Btn8R] == 1) && (driveController == 1)) || ((vexRT[Btn8RXmtr2] == 1) && (driveController == -1))) {
-			driveGear += 1;
-			wait1Msec(0500);
+		if(((vexRT[Btn7D] == 1) || (vexRT[Btn7DXmtr2] == 1)) && (driveControllerButton == 0)) {
+			driveController = driveController * -1;
+			driveControllerButton = 1;
 		}
-		else if((((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1)))&&(driveGear > 1)){
+		else {
+			driveControllerButton = 0;
+		}
+
+		if(((vexRT[Btn8R] == 1) && (driveController == 1)) || ((vexRT[Btn8RXmtr2] == 1) && (driveController == -1)) && (driveGearButton == 0)) {
+			driveGear += 1;
+			driveGearButton = 1;
+		}
+		else if((((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1))) && (driveGear > 1)  && (driveGearButton == 0)){
 			driveGear -= 1;
-			wait1Msec(0500);
+			driveGearButton = 1;
+		}
+		else {
+			driveGearButton = 0;
 		}
 
 		if(abs(trueCh2) > threshold){
