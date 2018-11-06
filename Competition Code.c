@@ -35,16 +35,16 @@ void moveDegrees(int degrees);
 void moveInches(int inches);
 void moveTicks(int rightTicks, int leftTicks);
 
-void cntrlMoveIntake();
+void ctrlMoveIntake();
 void toggleIntakeDown();
 void toggleIntakeUp();
 void toggleIntakeOff();
 
-void cntrlMoveClaw();
+void ctrlMoveClaw();
 void moveClaw(int degrees);
 void autoMoveClaw(int degrees);
 
-void cntrlMoveArm();
+void ctrlMoveArm();
 void moveArm(int degrees);
 void autoMoveArm(int degrees);
 
@@ -165,9 +165,9 @@ task usercontrol()
 	SensorValue[clawEnc] = 0;
 
 	while (true){
-		cntrlMoveIntake();
-		cntrlMoveClaw();
-		cntrlMoveArm();
+		ctrlMoveIntake();
+		ctrlMoveClaw();
+		ctrlMoveArm();
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
 			nAutonomous();
 		}
@@ -190,11 +190,11 @@ task usercontrol()
 			trueCh3 = (vexRT[Ch2Xmtr2]*direction)/driveGear;
 		}
 
-		if(((vexRT[Btn8D] == 1)|| (vexRT[Btn8DXmtr2] == 1)) && (directionButton == 0)) {
+		if(((vexRT[Btn8D] == 1) || (vexRT[Btn8DXmtr2] == 1)) && (directionButton == 0)) {
 			direction = direction * -1;
 			directionButton = 1;
 		}
-		else {
+		else if((vexRT[Btn8D] == 0) && (vexRT[Btn8DXmtr2] == 0)){
 			directionButton = 0;
 		}
 
@@ -202,7 +202,7 @@ task usercontrol()
 			driveController = driveController * -1;
 			driveControllerButton = 1;
 		}
-		else {
+		else if((vexRT[Btn7D] == 0) && (vexRT[Btn7DXmtr2] == 0)) {
 			driveControllerButton = 0;
 		}
 
@@ -214,7 +214,7 @@ task usercontrol()
 			driveGear -= 1;
 			driveGearButton = 1;
 		}
-		else {
+		else if(!(((vexRT[Btn8R] == 1) && (driveController == 1)) || ((vexRT[Btn8RXmtr2] == 1) && (driveController == -1))) && !(((vexRT[Btn8L] == 1) && (driveController == 1)) || ((vexRT[Btn8LXmtr2] == 1) && (driveController == -1)))){
 			driveGearButton = 0;
 		}
 
@@ -231,10 +231,10 @@ task usercontrol()
 			motor[right2] = -threshold;
 		}
 		else if(vexRT[Btn7L] == 1) {
-			ctrlMoveToDistance(70,70);
+			ctrlMoveToDistance(70,70); //values haven't been tested
 		}
 		else if(vexRT[Btn7R] == 1) {
-			ctrlMoveToDistance(160,160);
+			ctrlMoveToDistance(160,160); //values haven't been tested
 		}
 		else if(vexRT[Btn7LXmtr2] == 1) {
 			ctrlMoveToDistance(24,24);
@@ -282,28 +282,28 @@ task usercontrol()
 //                                A U T O N O M O U S   C O N T R O L   S E C T I O N
 //				Functions:
 //				Base Methods
-//					movetoDistance 		- moves robot to a certain distance from the fence
-//					ctrlMoveToDistance 	- moves robot to a certain distance from the fence, cancellable through 8U
+//					movetoDistance 		- moves robot to a certain distance from the fence (only uses leftSonar for now)
+//					ctrlMoveToDistance 	- moves robot to a certain distance from the fence, cancellable through 8U (only uses leftSonar for now)
 //					moveDegrees			- positive degrees turns counterclockwise (waits until completed)
 //					moveInches			- positive moves forward (waits until completed)
-//					moveTicks				- positive moves forward (waits until completed)
+//					moveTicks				- positive moves forward, use for swing turns (waits until completed)
 //				Claw Methods
 //					autoMoveClaw		- positive degrees turns claw upwards (waits until completed)
 //					moveClaw 				- positive degrees turns claw upwards
-//					cntrlMoveClaw		- remote control
+//					ctrlMoveClaw		- remote control
 //				Arm Methods
 //					autoMoveArm			- positive degrees turns claw upwards (waits until completed)
 //					moveArm 				- positive degrees turns claw upwards
-//					cntrlMoveArm		- remote control
+//					ctrlMoveArm		- remote control
 //				Intake Methods
 //					toggleIntakeUp	- intake up or off
 //					toggleIntakeDown- intake down or off
 //					toggleIntakeOff	- intake off
-//					cntrlMoveIntake	- remote control
+//					ctrlMoveIntake	- remote control
 //				Auton Methods
-//					cntrlMoveAuton 	- autonomous task
+//					cntrlMoveAuton 	- autonomous tasks
+//					nAutonomous 		- untested new autonomous code
 //					oAutonomous			- old autonomous code
-//					nAutonomous 		- incomplete new autonomous code
 //---------------------------------------------------------------------------------------------------------------
 
 int limiter(int n, int lowerBound) {
@@ -379,7 +379,6 @@ void moveDegrees(int degrees) { //Positive degrees turns clockwise
 }
 
 void moveInches(int inches) { //Positive moves forward
-	moveDegrees(10); //Something weird happening, robot swings right initially, compensated for
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
 	baseTicks = 25 * inches;
@@ -470,7 +469,7 @@ void moveClaw(int degrees) { //Positive moves claw up
 	}
 }
 
-void cntrlMoveClaw() {
+void ctrlMoveClaw() {
 	if(vexRT[Btn5DXmtr2] == 1 && clawButton == 0) {
 		moveClaw(-30);
 		clawButton = 1;
@@ -504,7 +503,7 @@ void moveArm(int degrees) { //Positive moves arm up
 	rightArmState = rightArmState - 10 * degrees;
 }
 
-void cntrlMoveArm() {
+void ctrlMoveArm() {
 	if(vexRT[Btn6DXmtr2] == 1) {
 		motor[arm] = -60;
 		armButton = 0;
@@ -564,7 +563,7 @@ void toggleIntakeOff() {
 	intakeDownState = -1;
 }
 
-void cntrlMoveIntake(){
+void ctrlMoveIntake(){
 	if(vexRT[Btn6U] == 1 && ballButton == 0) {
 		toggleIntakeUp();
 		ballButton = 1;
@@ -605,44 +604,84 @@ void cntrlMoveIntake(){
 
 task moveAuton() {
 	while(true) {
-		cntrlMoveIntake();
-		cntrlMoveClaw();
-		cntrlMoveArm();
+		ctrlMoveIntake();
+		ctrlMoveClaw();
+		ctrlMoveArm();
+	}
+}
+
+void nAutonomous() {
+	int r = 0;
+	startTask(moveAuton);
+	if(SensorValue[autonPot] < 2400) { //RED SIDE AUTON
+		r = 1;
+  	}
+  	else if(SensorValue[autonPot] > 2400) { //BLUE SIDE AUTON
+		r = -1;
+ 	}
+
+ 	moveInches(-12);						//Move to 3.5 or 1.5
+ 	autoMoveArm(10);
+	autoMoveClaw(-130);
+	moveDegrees(-10*r);						//Slightly turn to face flag
+	while(SensorValue[limitSwitch] == 1) { 	//Launch
+		motor[mangonel] = 127;
+	}
+	motor[mangonel] = 0;
+	while(SensorValue[limitSwitch] != 1) { 	//Pull back
+		motor[mangonel] = 127;
+	}
+	motor[mangonel] = 0;
+
+ 	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
+		moveInches(52);							//Hit low flag
+		moveDegrees(10*r);
+		if(r==-1) {								//Swing turn to cap on floor
+			moveTicks(-880,-500);				
+			moveTicks(-820,-600);
+		}
+		else {
+			moveTicks(-500,-880);
+			moveTicks(-600,-820);
+		}
+		toggleIntakeUp();						//Pick up ball
+		moveInches(-3);
+		while(SensorValue[intakeLimit] != 1) {
+			//Do nothing
+		}
+		toggleIntakeOff();
+		toggleIntakeUp();						//Load
+		wait1Msec(5000);
+		toggleIntakeOff();
+		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
+			toggleIntakeDown(); 				//Reverse intake
+			moveInches(-24);					//Ram cap
+			toggleIntakeOff();
+			moveInches(40);						//Align to red alliance platform
+			moveDegrees(-90);					//Turn to make rear face red alliance platform
+			moveInches(-26);
+			moveDegrees(-90);					//Turn to make rear face center platform
+			moveInches(-26);
+		}
+	}
+	else { //BACK TILE AUTON
+		moveDegrees(10*r);
+		moveInches(12);							//Move back to starting tile
+		autoMoveClaw(120);						//Retract forklift (can't do 130 because it gets stuck)
+		moveDegrees(90*r);						//Turn to make rear face caps
+		toggleIntakeUp();						//Pick up ball
+		moveInches(-38);
+		while(SensorValue[intakeLimit] != 1) {
+			//Do nothing
+		}
+		toggleIntakeOff();
+		toggleIntakeUp();						//Load
+		wait1Msec(5000);
+		toggleIntakeOff();
 	}
 }
 
 void oAutonomous() {
-	moveInches(-12);
-	autoMoveArm(10);
-	autoMoveClaw(-130);
-	wait1Msec(0500);
-	moveInches(20);
-	wait1Msec(0500);
-	moveDegrees(13);
-	wait1Msec(0500);
-	while(SensorValue[limitSwitch] == 1) {
-		motor[mangonel] = 127;
-	}
-	motor[mangonel] = 0;
-	moveInches(36);
-	wait1Msec(0500);
-	moveDegrees(-13);
-	wait1Msec(0250);
-	SensorValue[rightEnc] = 0;
-	SensorValue[leftEnc] = 0;
-	moveTicks(-880,-500);
-	moveTicks(-820,-600);
-	/*
-	toggleIntakeUp();
-	while(SensorValue[intakeLimit] != 1) {
-		//Do nothing
-	}
-	toggleIntakeOff(); //Turn intake off
-	moveInches(36);
-	*/
-}
-
-void nAutonomous() {
 	//CURRENTLY, THE AUTONOMUS IS MEANT TO COMPLETE SKILLS AUTON FOR ONE SIDE
 	//CAN BE BROKEN DOWN TO TO ITS COMPONENT PARTS (FLAG TILE AND CAP TILE) FOR SKILLS
 	int r = 0;
