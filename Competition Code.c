@@ -322,16 +322,16 @@ int limiter(int n, int lowerBound) {
 }
 
 void moveToDistance(int rightDist, int leftDist) {
-	rightBasePower = (rightDist - SensorValue[rightSonar])*10;
-	leftBasePower = (leftDist - SensorValue[leftSonar])*10;
+	rightBasePower = -(rightDist - SensorValue[rightSonar])*5;
+	leftBasePower = -(leftDist - SensorValue[leftSonar])*5;
 	int lowerBound = 30;
-	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
-		motor[right] = limiter(rightBasePower,lowerBound);
-		motor[right2] = limiter(rightBasePower,lowerBound);
+	while(limiter(leftBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
+		motor[right] = limiter(leftBasePower,lowerBound);
+		motor[right2] = limiter(leftBasePower,lowerBound);
 		motor[left] = limiter(leftBasePower,lowerBound);
 		motor[left2] = limiter(leftBasePower,lowerBound);
-		rightBasePower = baseTicks - SensorValue[rightEnc];
-		leftBasePower = baseTicks - SensorValue[leftEnc];
+		rightBasePower = -(rightDist - SensorValue[rightSonar]) * 5;
+		leftBasePower = -(leftDist - SensorValue[leftSonar]) * 5;
 	}
 	motor[right] = 0;
 	motor[right2] = 0;
@@ -340,16 +340,16 @@ void moveToDistance(int rightDist, int leftDist) {
 }
 
 void ctrlMoveToDistance(int rightDist, int leftDist) {
-	rightBasePower = (rightDist - SensorValue[rightSonar])*10;
-	leftBasePower = (leftDist - SensorValue[leftSonar])*10;
+	rightBasePower = -(rightDist - SensorValue[rightSonar]) * 5;
+	leftBasePower = -(leftDist - SensorValue[leftSonar]) * 5;
 	int lowerBound = 30;
-	while((limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) && vexRT[Btn8U] == 0) {
-		motor[right] = limiter(rightBasePower,lowerBound);
-		motor[right2] = limiter(rightBasePower,lowerBound);
+	while((limiter(leftBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) && vexRT[Btn8U] == 0) {
+		motor[right] = limiter(leftBasePower,lowerBound);
+		motor[right2] = limiter(leftBasePower,lowerBound);
 		motor[left] = limiter(leftBasePower,lowerBound);
 		motor[left2] = limiter(leftBasePower,lowerBound);
-		rightBasePower = baseTicks - SensorValue[rightEnc];
-		leftBasePower = baseTicks - SensorValue[leftEnc];
+		rightBasePower = -(rightDist - SensorValue[rightSonar]) * 5;
+		leftBasePower = -(leftDist - SensorValue[leftSonar]) * 5;
 	}
 	motor[right] = 0;
 	motor[right2] = 0;
@@ -360,7 +360,7 @@ void ctrlMoveToDistance(int rightDist, int leftDist) {
 void moveDegrees(int degrees) { //Positive degrees turns clockwise
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
-	baseTicks = 3.8 * degrees;
+	baseTicks = 3.7 * degrees;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = - SensorValue[leftEnc] - baseTicks;
 	int lowerBound = 30;
@@ -379,9 +379,10 @@ void moveDegrees(int degrees) { //Positive degrees turns clockwise
 }
 
 void moveInches(int inches) { //Positive moves forward
+	moveDegrees(10); //Something weird happening, robot swings right initially, compensated for
 	SensorValue[leftEnc] = 0;
 	SensorValue[rightEnc] = 0;
-	baseTicks = 30 * inches;
+	baseTicks = 25 * inches;
 	rightBasePower = baseTicks - SensorValue[rightEnc];
 	leftBasePower = baseTicks - SensorValue[leftEnc];
 	int lowerBound = 30;
@@ -658,13 +659,12 @@ void nAutonomous() {
   	//FLAG TILE
 	startTask(moveAuton);
 	toggleIntakeUp();						//Pick up ball
-	moveDegrees(10); //Something weird happening, robot swings right initially, compensated for
-	moveInches(-36);
+	moveInches(-38);
 	while(SensorValue[intakeLimit] != 1) {
 		//Do nothing
 	}
 	toggleIntakeOff();
-	moveInches(36);							//Move back to starting tile
+	moveInches(38);							//Move back to starting tile
 	moveDegrees(90*r);						//Turn to face flags
 	moveInches(-12);						//Move into expansion zone
 	autoMoveArm(10);						//Move claw out of the way
@@ -680,6 +680,7 @@ void nAutonomous() {
 		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
+	/*
 	toggleIntakeUp();						//Load
 	wait1Msec(2000);
 	moveInches(24);
@@ -710,4 +711,5 @@ void nAutonomous() {
 	moveInches(24);							//Move to align with alliance tile
 	moveDegrees(-90*r);
 	moveInches(-48);						//Move to alliance tile
+	*/
 }
