@@ -623,7 +623,7 @@ void nAutonomous() {
  	moveInches(-12);						//Move to 3.5 or 1.5
  	autoMoveArm(10);
 	autoMoveClaw(-130);
-	wait1Msec(1500);
+	wait1Msec(1250);
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
 	}
@@ -633,35 +633,13 @@ void nAutonomous() {
 	}
 	motor[mangonel] = 0;
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveInches(26);
-		//moveDegrees(-10*r);
-		moveInches(38);							//Hit low flag
-		if(r==-1) {								//Swing turn to cap on floor
-			moveTicks(-880,-500);
-			moveTicks(-820,-600);
-		}
-		else {
-			moveTicks(-500,-880);
-			moveTicks(-600,-820);
-		}
-		toggleIntakeUp();						//Pick up ball
-		moveInches(-3);
-		while(SensorValue[intakeLimit] != 1) {
-			//Do nothing
-		}
-		toggleIntakeOff();
-		toggleIntakeUp();						//Load
-		wait1Msec(5000);
-		toggleIntakeOff();
+		moveInches(62);							//Hit low flag
+		moveInches(-50);						
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
-			toggleIntakeDown(); 				//Reverse intake
-			moveInches(-24);					//Ram cap
-			toggleIntakeOff();
-			moveInches(40);						//Align to red alliance platform
-			moveDegrees(-90);					//Turn to make rear face red alliance platform
-			moveInches(-26);
-			moveDegrees(-90);					//Turn to make rear face center platform
-			moveInches(-26);
+			moveInches(-24);	
+			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
+			moveDegrees(90);					//Turn to make rear face platform
+			moveInches(-68);					//Move to center platform
 		}
 	}
 	else { //BACK TILE AUTON
