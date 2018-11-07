@@ -633,8 +633,8 @@ void nAutonomous() {
 	}
 	motor[mangonel] = 0;
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveInches(26);							
-		moveDegrees(-10*r);
+		moveInches(26);
+		//moveDegrees(-10*r);
 		moveInches(38);							//Hit low flag
 		if(r==-1) {								//Swing turn to cap on floor
 			moveTicks(-880,-500);
