@@ -623,7 +623,6 @@ void nAutonomous() {
  	moveInches(-12);						//Move to 3.5 or 1.5
  	autoMoveArm(10);
 	autoMoveClaw(-130);
-	moveDegrees(-10*r);
 	wait1Msec(1500);
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
@@ -633,7 +632,6 @@ void nAutonomous() {
 		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
-	moveDegrees(10*r);
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
 		moveInches(26);							
 		moveDegrees(-10*r);
