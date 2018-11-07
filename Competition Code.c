@@ -623,6 +623,7 @@ void nAutonomous() {
  	moveInches(-12);						//Move to 3.5 or 1.5
  	autoMoveArm(10);
 	autoMoveClaw(-130);
+	moveDegrees(-10*r);
 	wait1Msec(1250);
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
@@ -632,14 +633,19 @@ void nAutonomous() {
 		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
+	//moveDegrees(10*r);
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveInches(62);							//Hit low flag
-		moveInches(-50);						
+		moveInches(48);							//Hit low flag
+		moveInches(-30);
+		moveDegrees(10*r);
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-24);	
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
 			moveDegrees(90);					//Turn to make rear face platform
 			moveInches(-68);					//Move to center platform
+		}
+		else {
+			
 		}
 	}
 	else { //BACK TILE AUTON
