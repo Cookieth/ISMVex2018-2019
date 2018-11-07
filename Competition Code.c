@@ -162,7 +162,6 @@ task usercontrol()
 	armButton = 0;
 	clawState = 0;
 	clawButton = 0;
-	SensorValue[clawEnc] = 0;
 
 	while (true){
 		ctrlMoveIntake();
@@ -483,12 +482,14 @@ void ctrlMoveClaw() {
 	}
 
 	if(vexRT[Btn8UXmtr2] == 1) {
-		SensorValue[clawEnc] = -120;
+		motor[claw] = 50;
+		clawState = 0;
+		SensorValue[clawEnc] = 0;
 	}
-
-	clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
-
-	motor[claw] = clawPower;
+	else {
+		clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
+		motor[claw] = clawPower;
+	}
 }
 
 void autoMoveArm(int degrees) { //Only goes up
@@ -505,7 +506,7 @@ void moveArm(int degrees) { //Positive moves arm up
 
 void ctrlMoveArm() {
 	if(vexRT[Btn6DXmtr2] == 1) {
-		motor[arm] = -60;
+		motor[arm] = -20;
 		armButton = 0;
 	}
 	else if(vexRT[Btn6UXmtr2] == 1) {
@@ -603,10 +604,53 @@ void ctrlMoveIntake(){
 }
 
 task moveAuton() {
+	SensorValue[clawEnc] = 0;
+	intakeUpState = -1;
+	intakeDownState = -1;
+	ball = 0;
+	leftArmState = SensorValue[leftArmPot];
+	rightArmState = SensorValue[rightArmPot];
+	clawState = 0;
+
 	while(true) {
-		ctrlMoveIntake();
-		ctrlMoveClaw();
-		ctrlMoveArm();
+		if(SensorValue[intakeLimit] == 1 && ball == 0) {
+			ball = 1;
+			intakeUpState = -1;
+			intakeDownState = -1;
+			motor[intake] = 0;
+
+		}
+		else if(intakeUpState == 1){
+			motor[intake] = 127;
+			if(SensorValue[intakeLimit] == 0) {
+				ball = 0;
+			}
+		}
+		else if(intakeDownState == 1){
+			motor[intake] = -127;
+			if(SensorValue[intakeLimit] == 0) {
+				ball = 0;
+			}
+		}
+		else{
+			motor[intake] = 0;
+		}
+
+		clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
+		motor[claw] = clawPower;
+
+		leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])),15);
+		rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)),15);
+		if(leftArmPower > rightArmPower) {
+			armPower = leftArmPower;
+		}
+		else {
+			armPower = rightArmPower;
+		}
+		if(armPower < 15) {
+			armPower = 0;
+		}
+		motor[arm] = armPower;
 	}
 }
 
@@ -633,7 +677,6 @@ void nAutonomous() {
 		motor[mangonel] = 127;
 	}
 	motor[mangonel] = 0;
-	//moveDegrees(10*r);
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
 		moveInches(48);							//Hit low flag
 		moveInches(-30);
@@ -641,11 +684,25 @@ void nAutonomous() {
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-24);	
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
-			moveDegrees(90);					//Turn to make rear face platform
-			moveInches(-68);					//Move to center platform
+			moveDegrees(-90);					//Turn to make rear face platform
+			autoMoveArm(30);
+			moveInches(68);					//Move to center platform
 		}
-		else {
-			
+		else {									//NON SKILLS AUTON CONTINUATION
+			moveInches(-12);
+			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
+			moveInches(-12);
+			moveDegrees(90*r);
+			toggleIntakeUp();						//Pick up ball
+			moveInches(-38);
+			while(SensorValue[intakeLimit] != 1) {
+				//Do nothing
+			}
+			toggleIntakeOff();
+			moveInches(14);
+			toggleIntakeUp();						//Load
+			wait1Msec(3000);
+			toggleIntakeOff();
 		}
 	}
 	else { //BACK TILE AUTON
@@ -659,9 +716,10 @@ void nAutonomous() {
 		}
 		toggleIntakeOff();
 		toggleIntakeUp();						//Load
-		wait1Msec(5000);
+		wait1Msec(3000);
 		toggleIntakeOff();
 	}
+	stopTask(moveAuton);
 }
 
 void oAutonomous() {
