@@ -453,6 +453,7 @@ void moveTicks(int rightTicks, int leftTicks) { //Positive moves forward
 
 void autoMoveClaw(int degrees) {
 	moveClaw(degrees);
+	armButton = 1;
 	while(clawPower != 0) {
 		wait1Msec(0001);
 	}
@@ -497,6 +498,10 @@ void autoMoveArm(int degrees) { //Only goes up
 	while(armPower != 0) {
 		wait1Msec(0001);
 	}
+	motor[arm] = 0;
+	leftArmState = SensorValue[leftArmPot];
+	rightArmState = SensorValue[rightArmPot];
+	
 }
 
 void moveArm(int degrees) { //Positive moves arm up
@@ -615,7 +620,6 @@ task moveAuton() {
 	while(true) {
 		ctrlMoveIntake();
 		ctrlMoveClaw();
-		ctrlMoveArm();
 	}
 }
 
@@ -628,11 +632,11 @@ void nAutonomous() {
   	else if(SensorValue[autonPot] > 2400) { //BLUE SIDE AUTON
 		r = -1;
  	}
-
- 	moveInches(-12);						//Move to 3.5 or 1.5
- 	autoMoveArm(10);
+	
+ 	moveDegrees(10*r); //avoid pole
+ 	moveInches(-12);		//Move to 3.5 or 1.5
 	autoMoveClaw(-130);
-	moveDegrees(-10*r);
+	moveDegrees(-11*r);
 	wait1Msec(1250);
 	while(SensorValue[limitSwitch] == 1) { 	//Launch
 		motor[mangonel] = 127;
@@ -645,12 +649,25 @@ void nAutonomous() {
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
 		moveInches(48);							//Hit low flag
 		moveInches(-30);
-		moveDegrees(10*r);
+		moveDegrees(12*r);
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
-			moveInches(-24);	
+			moveInches(-34);	//move back after hitting the low flag
+			moveDegrees (-90); //turn 90
+			motor[right] = -127;
+			motor[right2] = -127;
+			motor[left] = -127;
+			motor[left2] = -127;
+			wait1Msec(0500);
+			motor[right] = 0;
+			motor[right2] = 0;
+			motor[left] = 0;
+			motor[left2] = 0;
+			
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
-			moveDegrees(-90);					//Turn to make rear face platform
-			autoMoveArm(30);
+			motor[arm] = 127;
+			wait1Msec(1000);
+			motor[arm] = 0;
+
 			moveInches(68);					//Move to center platform
 		}
 		else {									//NON SKILLS AUTON CONTINUATION
