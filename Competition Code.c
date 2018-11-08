@@ -613,44 +613,9 @@ task moveAuton() {
 	clawState = 0;
 
 	while(true) {
-		if(SensorValue[intakeLimit] == 1 && ball == 0) {
-			ball = 1;
-			intakeUpState = -1;
-			intakeDownState = -1;
-			motor[intake] = 0;
-
-		}
-		else if(intakeUpState == 1){
-			motor[intake] = 127;
-			if(SensorValue[intakeLimit] == 0) {
-				ball = 0;
-			}
-		}
-		else if(intakeDownState == 1){
-			motor[intake] = -127;
-			if(SensorValue[intakeLimit] == 0) {
-				ball = 0;
-			}
-		}
-		else{
-			motor[intake] = 0;
-		}
-
-		clawPower = limiter((int)((clawState - SensorValue[clawEnc])/3),10);
-		motor[claw] = clawPower;
-
-		leftArmPower = limiter((int)((leftArmState - SensorValue[leftArmPot])),15);
-		rightArmPower = limiter((int)((SensorValue[rightArmPot] - rightArmState)),15);
-		if(leftArmPower > rightArmPower) {
-			armPower = leftArmPower;
-		}
-		else {
-			armPower = rightArmPower;
-		}
-		if(armPower < 15) {
-			armPower = 0;
-		}
-		motor[arm] = armPower;
+		ctrlMoveIntake();
+		ctrlMoveClaw();
+		ctrlMoveArm();
 	}
 }
 
