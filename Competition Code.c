@@ -501,7 +501,7 @@ void autoMoveArm(int degrees) { //Only goes up
 	motor[arm] = 0;
 	leftArmState = SensorValue[leftArmPot];
 	rightArmState = SensorValue[rightArmPot];
-	
+
 }
 
 void moveArm(int degrees) { //Positive moves arm up
@@ -632,27 +632,30 @@ void nAutonomous() {
   	else if(SensorValue[autonPot] > 2400) { //BLUE SIDE AUTON
 		r = -1;
  	}
-	
- 	moveDegrees(10*r); //avoid pole
- 	moveInches(-12);		//Move to 3.5 or 1.5
-	autoMoveClaw(-130);
-	moveDegrees(-11*r);
-	wait1Msec(1250);
-	while(SensorValue[limitSwitch] == 1) { 	//Launch
-		motor[mangonel] = 127;
-	}
-	motor[mangonel] = 0;
-	while(SensorValue[limitSwitch] != 1) { 	//Pull back
-		motor[mangonel] = 127;
-	}
-	motor[mangonel] = 0;
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveInches(48);							//Hit low flag
+		moveDegrees(10*r); //avoid pole
+		
+ 		moveInches(-12);		//Move to 3.5
+		autoMoveClaw(-130);
+		moveDegrees(-11*r);
+		wait1Msec(1250);
+		
+		while(SensorValue[limitSwitch] == 1) { 	//Launch
+			motor[mangonel] = 127;
+		}
+		motor[mangonel] = 0;
+		while(SensorValue[limitSwitch] != 1) { 	//Pull back
+			motor[mangonel] = 127;
+		}
+		motor[mangonel] = 0;
+		
+ 		moveInches(48);							//Hit low flag
 		moveInches(-30);
-		moveDegrees(12*r);
+		moveDegrees(18*r);
+		
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
-			moveInches(-34);	//move back after hitting the low flag
-			moveDegrees (-90); //turn 90
+			moveInches(-37);	//move back after hitting the low flag
+			moveDegrees (-98); //turn 90
 			motor[right] = -127;
 			motor[right2] = -127;
 			motor[left] = -127;
@@ -662,16 +665,26 @@ void nAutonomous() {
 			motor[right2] = 0;
 			motor[left] = 0;
 			motor[left2] = 0;
-			
+
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
 			motor[arm] = 127;
-			wait1Msec(1000);
+			wait1Msec(0450);
+			motor[arm] = 20;
+		
+			motor[right] = 127;					//Move to center platform
+			motor[right2] = 127;
+			motor[left] = 127;
+			motor[left2] = 127;
+			wait1Msec(4650);
+			motor[right] = 0;
+			motor[right2] = 0;
+			motor[left] = 0;
+			motor[left2] = 0;	
 			motor[arm] = 0;
-
-			moveInches(68);					//Move to center platform
 		}
 		else {									//NON SKILLS AUTON CONTINUATION
 			moveInches(-12);
+			/*
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
 			moveInches(-12);
 			moveDegrees(90*r);
@@ -685,21 +698,22 @@ void nAutonomous() {
 			toggleIntakeUp();						//Load
 			wait1Msec(3000);
 			toggleIntakeOff();
+			*/
 		}
 	}
 	else { //BACK TILE AUTON
+		/*
 		moveInches(12);							//Move back to starting tile
 		autoMoveClaw(120);						//Retract forklift (can't do 130 because it gets stuck)
 		moveDegrees(90*r);						//Turn to make rear face caps
+		*/
 		toggleIntakeUp();						//Pick up ball
 		moveInches(-38);
 		while(SensorValue[intakeLimit] != 1) {
 			//Do nothing
 		}
 		toggleIntakeOff();
-		toggleIntakeUp();						//Load
-		wait1Msec(3000);
-		toggleIntakeOff();
+		moveInches(12);
 	}
 	stopTask(moveAuton);
 }
