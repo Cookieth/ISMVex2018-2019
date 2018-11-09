@@ -702,11 +702,6 @@ void nAutonomous() {
 		}
 	}
 	else { //BACK TILE AUTON
-		/*
-		moveInches(12);							//Move back to starting tile
-		autoMoveClaw(120);						//Retract forklift (can't do 130 because it gets stuck)
-		moveDegrees(90*r);						//Turn to make rear face caps
-		*/
 		toggleIntakeUp();						//Pick up ball
 		moveInches(-38);
 		while(SensorValue[intakeLimit] != 1) {
@@ -714,6 +709,13 @@ void nAutonomous() {
 		}
 		toggleIntakeOff();
 		moveInches(12);
+		moveDegrees(-45*r);
+		toggleIntakeDown();
+		moveInches(-42);
+		toggleIntakeOff();
+		autoMoveClaw(-130);
+		moveInches(42);
+
 	}
 	stopTask(moveAuton);
 }
