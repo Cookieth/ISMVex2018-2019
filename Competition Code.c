@@ -483,7 +483,7 @@ void ctrlMoveClaw() {
 	}
 
 	if(vexRT[Btn8UXmtr2] == 1) {
-		motor[claw] = 50;
+		motor[claw] = 80;
 		clawState = 0;
 		SensorValue[clawEnc] = 0;
 	}
@@ -634,12 +634,12 @@ void nAutonomous() {
  	}
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
 		moveDegrees(10*r); //avoid pole
-		
+
  		moveInches(-12);		//Move to 3.5
 		autoMoveClaw(-130);
 		moveDegrees(-11*r);
 		wait1Msec(1250);
-		
+
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
@@ -648,11 +648,11 @@ void nAutonomous() {
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
-		
+
  		moveInches(48);							//Hit low flag
 		moveInches(-30);
 		moveDegrees(18*r);
-		
+
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-37);	//move back after hitting the low flag
 			moveDegrees (-98); //turn 90
@@ -670,7 +670,7 @@ void nAutonomous() {
 			motor[arm] = 127;
 			wait1Msec(0450);
 			motor[arm] = 20;
-		
+
 			motor[right] = 127;					//Move to center platform
 			motor[right2] = 127;
 			motor[left] = 127;
@@ -679,7 +679,7 @@ void nAutonomous() {
 			motor[right] = 0;
 			motor[right2] = 0;
 			motor[left] = 0;
-			motor[left2] = 0;	
+			motor[left2] = 0;
 			motor[arm] = 0;
 		}
 		else {									//NON SKILLS AUTON CONTINUATION
@@ -702,20 +702,38 @@ void nAutonomous() {
 		}
 	}
 	else { //BACK TILE AUTON
+		autoMoveClaw(-130);
+		wait1Msec(1250);
+
+		while(SensorValue[limitSwitch] == 1) { 	//Launch
+			motor[mangonel] = 127;
+		}
+		motor[mangonel] = 0;
+		while(SensorValue[limitSwitch] != 1) { 	//Pull back
+			motor[mangonel] = 127;
+		}
+		motor[mangonel] = 0;
+		autoMoveClaw(120);
+
+		moveDegrees(90*r);
 		toggleIntakeUp();						//Pick up ball
-		moveInches(-38);
+		moveInches(-41);
 		while(SensorValue[intakeLimit] != 1) {
 			//Do nothing
 		}
 		toggleIntakeOff();
 		moveInches(12);
-		moveDegrees(-45*r);
+		/*
 		toggleIntakeDown();
-		moveInches(-42);
+		moveDegrees(-90*r);
+		moveInches(-18);
+		moveDegrees(85*r);
+		moveInches(12);
+		moveInches(-38);
 		toggleIntakeOff();
 		autoMoveClaw(-130);
-		moveInches(42);
-
+		moveInches(24);
+		*/
 	}
 	stopTask(moveAuton);
 }
