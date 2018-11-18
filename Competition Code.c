@@ -750,8 +750,10 @@ void calibrateGyro() {
 }
 
 void moveDegreesGyro(int degrees10) { //Positive degrees turns clockwise
-	int degrees = degrees10 * 10;
-	rightBasePower = 0.37 * (degrees10 - SensorValue[in4]);
+	int trgDegrees = degrees10 * 10;
+	int orgDegrees = SensorValue[in4];
+	int newDegrees = 0;
+	rightBasePower = 0.37 * (trgDegrees - newDegrees);
 	leftBasePower = -rightBasePower;
 	int lowerBound = 30;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
@@ -759,7 +761,14 @@ void moveDegreesGyro(int degrees10) { //Positive degrees turns clockwise
 		motor[right2] = limiter(rightBasePower,lowerBound);
 		motor[left] = limiter(leftBasePower,lowerBound);
 		motor[left2] = limiter(leftBasePower,lowerBound);
-		rightBasePower = 0.37 * (degrees10 - SensorValue[in4]);
+		newDegrees = orgDegrees - SensorValue[in4];
+		if(abs(newDegrees) > abs(newDegrees - 3600)) {
+			newDegrees = newDegrees - 3600;
+		}
+		else if(abs(newDegrees) > abs(newDegrees + 3600)) {
+			newDegrees = newDegrees + 3600
+		}
+		rightBasePower = 0.37 * (trgDegrees - newDegrees);
 		leftBasePower = -rightBasePower;
 	}
 	motor[right] = 0;
