@@ -49,6 +49,9 @@ void ctrlMoveArm();
 void moveArm(int degrees);
 void autoMoveArm(int degrees);
 
+void calibrateGyro();
+void moveDegreesGyro(int degrees10);
+
 int clawState;
 int clawButton;
 int clawPower;
