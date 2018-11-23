@@ -766,9 +766,13 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 	trgDegrees = degrees10 * 10;
 	int orgDegrees = SensorValue[in4];
 	int newDegrees = 0;
-	rightBasePower = 0.20 * (trgDegrees - newDegrees);
+	int lowerBound = 15;
+	int power = 0.20 * (trgDegrees - newDegrees);
+	rightBasePower = power;
+	if(limiter(power,lowerBound) != 0 && power < 50) {
+		rightBasePower = 30;
+	}
 	leftBasePower = -rightBasePower;
-	int lowerBound = 50;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
 		motor[right] = limiter(rightBasePower,lowerBound);
 		motor[right2] = limiter(rightBasePower,lowerBound);
@@ -781,7 +785,11 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 		else if(abs(newDegrees) > abs(newDegrees + 3600)) {
 			newDegrees = newDegrees + 3600;
 		}
-		rightBasePower = 0.20 * (trgDegrees - newDegrees);
+		power = 0.20 * (trgDegrees - newDegrees);
+		rightBasePower = power;
+		if(limiter(power,lowerBound) != 0 && power < 50) {
+			rightBasePower = 30;
+		}
 		leftBasePower = -rightBasePower;
 	}
 	motor[right] = 0;
@@ -792,15 +800,23 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 
 void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
 	trgDegrees = degrees10 * 10;
-	rightBasePower = 0.20 * (trgDegrees - SensorValue[in4]);
+	int lowerBound = 15;
+	int power = 0.20 * (trgDegrees - newDegrees);
+	rightBasePower = power;
+	if(limiter(power,lowerBound) != 0 && power < 50) {
+		rightBasePower = 30;
+	}
 	leftBasePower = -rightBasePower;
-	int lowerBound = 50;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
 		motor[right] = limiter(rightBasePower,lowerBound);
 		motor[right2] = limiter(rightBasePower,lowerBound);
 		motor[left] = limiter(leftBasePower,lowerBound);
 		motor[left2] = limiter(leftBasePower,lowerBound);
-		rightBasePower = 0.20 * (trgDegrees - SensorValue[in4]);
+		power = 0.20 * (trgDegrees - newDegrees);
+		rightBasePower = power;
+		if(limiter(power,lowerBound) != 0 && power < 50) {
+			rightBasePower = 30;
+		}
 		leftBasePower = -rightBasePower;
 	}
 	motor[right] = 0;
