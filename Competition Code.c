@@ -50,7 +50,8 @@ void moveArm(int degrees);
 void autoMoveArm(int degrees);
 
 void calibrateGyro();
-void moveDegreesGyro(int degrees10);
+void moveRelDegrees(int degrees10);
+void moveAbsDegrees(int degrees10);
 
 int clawState;
 int clawButton;
@@ -72,6 +73,7 @@ int needRightTicks;
 int needLeftTicks;
 int ball;
 int ballButton;
+int trgDegrees;
 float baseTicks;
 float ratio;
 
@@ -235,16 +237,24 @@ task usercontrol()
 			motor[right2] = -threshold;
 		}
 		else if(vexRT[Btn7L] == 1) {
-			ctrlMoveToDistance(70,70); //values haven't been tested
+			calibrateGyro();
+			moveAbsDegrees(90);
+			//ctrlMoveToDistance(70,70); //values haven't been tested
 		}
 		else if(vexRT[Btn7R] == 1) {
-			ctrlMoveToDistance(160,160); //values haven't been tested
+			calibrateGyro();
+			moveAbsDegrees(-25);
+			//ctrlMoveToDistance(160,160); //values haven't been tested
 		}
 		else if(vexRT[Btn7LXmtr2] == 1) {
-			ctrlMoveToDistance(24,24);
+			calibrateGyro();
+			moveRelDegrees(90);
+			//ctrlMoveToDistance(24,24);
 		}
 		else if(vexRT[Btn7RXmtr2] == 1) {
-			ctrlMoveToDistance(34,34);
+			calibrateGyro();
+			moveRelDegrees(-90);
+			//ctrlMoveToDistance(34,34);
 		}
 		else{
 			motor[right] = 0;
@@ -746,19 +756,19 @@ void nAutonomous() {
 }
 
 void calibrateGyro() {
-	 SensorType[in8] = sensorNone; //Clears previous sensor readings
+	 SensorType[in4] = sensorNone; //Clears previous sensor readings
 	 wait1Msec(1000);
-	 SensorType[in8] = sensorGyro; //Connects Gyro and callibrates it, needs 1.1 seconds to complete
+	 SensorType[in4] = sensorGyro; //Connects Gyro and callibrates it, needs 1.1 seconds to complete
 	 wait1Msec(2000);
 }
 
-void moveDegreesGyro(int degrees10) { //Positive degrees turns clockwise
-	int trgDegrees = degrees10 * 10;
+void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
+	trgDegrees = degrees10 * 10;
 	int orgDegrees = SensorValue[in4];
 	int newDegrees = 0;
-	rightBasePower = 0.37 * (trgDegrees - newDegrees);
+	rightBasePower = 0.20 * (trgDegrees - newDegrees);
 	leftBasePower = -rightBasePower;
-	int lowerBound = 30;
+	int lowerBound = 50;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
 		motor[right] = limiter(rightBasePower,lowerBound);
 		motor[right2] = limiter(rightBasePower,lowerBound);
@@ -769,9 +779,28 @@ void moveDegreesGyro(int degrees10) { //Positive degrees turns clockwise
 			newDegrees = newDegrees - 3600;
 		}
 		else if(abs(newDegrees) > abs(newDegrees + 3600)) {
-			newDegrees = newDegrees + 3600
+			newDegrees = newDegrees + 3600;
 		}
-		rightBasePower = 0.37 * (trgDegrees - newDegrees);
+		rightBasePower = 0.20 * (trgDegrees - newDegrees);
+		leftBasePower = -rightBasePower;
+	}
+	motor[right] = 0;
+	motor[right2] = 0;
+	motor[left] = 0;
+	motor[left2] = 0;
+}
+
+void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
+	trgDegrees = degrees10 * 10;
+	rightBasePower = 0.20 * (trgDegrees - SensorValue[in4]);
+	leftBasePower = -rightBasePower;
+	int lowerBound = 50;
+	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
+		motor[right] = limiter(rightBasePower,lowerBound);
+		motor[right2] = limiter(rightBasePower,lowerBound);
+		motor[left] = limiter(leftBasePower,lowerBound);
+		motor[left2] = limiter(leftBasePower,lowerBound);
+		rightBasePower = 0.20 * (trgDegrees - SensorValue[in4]);
 		leftBasePower = -rightBasePower;
 	}
 	motor[right] = 0;
