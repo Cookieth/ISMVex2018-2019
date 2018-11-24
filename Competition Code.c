@@ -751,6 +751,7 @@ void nAutonomous() {
 		moveAbsDegrees(80*r);
 		moveInches(-19);
 		moveAbsDegrees(90*r);
+		toggleIntakeUp();
 		while(SensorValue[intakeLimit] != 1) {
 				//Do nothing
 			}
