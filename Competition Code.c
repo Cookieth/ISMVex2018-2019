@@ -243,7 +243,7 @@ task usercontrol()
 		}
 		else if(vexRT[Btn7R] == 1) {
 			calibrateGyro();
-			moveAbsDegrees(-25);
+			moveAbsDegrees(-15);
 			//ctrlMoveToDistance(160,160); //values haven't been tested
 		}
 		else if(vexRT[Btn7LXmtr2] == 1) {
@@ -637,6 +637,12 @@ task moveAuton() {
 	while(true) {
 		ctrlMoveIntake();
 		ctrlMoveClaw();
+		if(SensorValue[limitSwitch] != 1) { 	//Pull back
+			motor[mangonel] = 127;
+		}
+		else {
+			motor[mangonel] = 0;
+		}
 	}
 }
 
@@ -650,26 +656,25 @@ void nAutonomous() {
 		r = -1;
  	}
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveDegrees(10*r); //avoid pole
-
- 		moveInches(-12);		//Move to 3.5
-		autoMoveClaw(-130);
-		moveDegrees(-11*r);
+		moveDegrees(-15*r);
 		wait1Msec(1250);
-
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
-		while(SensorValue[limitSwitch] != 1) { 	//Pull back
-			motor[mangonel] = 127;
+		moveDegrees(15*r);
+		moveInches(3);
+		moveDegrees(90*r);
+		toggleIntakeUp();						//Pick up ball
+		moveInches(-38);
+		while(SensorValue[intakeLimit] != 1) {
+			//Do nothing
 		}
-		motor[mangonel] = 0;
-
- 		moveInches(48);							//Hit low flag
-		moveInches(-30);
-		moveDegrees(18*r);
-
+		toggleIntakeOff();
+		moveInches(38);
+ 		//moveInches(52);							//Hit low flag
+		//moveInches(-40);
+		/*
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-37);	//move back after hitting the low flag
 			moveDegrees (-98); //turn 90
@@ -701,7 +706,6 @@ void nAutonomous() {
 		}
 		else {									//NON SKILLS AUTON CONTINUATION
 			moveInches(-12);
-			/*
 			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
 			moveInches(-12);
 			moveDegrees(90*r);
@@ -715,8 +719,8 @@ void nAutonomous() {
 			toggleIntakeUp();						//Load
 			wait1Msec(3000);
 			toggleIntakeOff();
-			*/
 		}
+		*/
 	}
 	else { //BACK TILE AUTON
 		autoMoveClaw(-130);
@@ -769,8 +773,13 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 	int lowerBound = 15;
 	int power = 0.20 * (trgDegrees - newDegrees);
 	rightBasePower = power;
-	if(limiter(power,lowerBound) != 0 && power < 50) {
-		rightBasePower = 30;
+	if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
+		if(power > 0) {
+			rightBasePower = 30;
+		}
+		else if(power < 0) {
+			rightBasePower = -30;
+		}
 	}
 	leftBasePower = -rightBasePower;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
@@ -787,8 +796,13 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 		}
 		power = 0.20 * (trgDegrees - newDegrees);
 		rightBasePower = power;
-		if(limiter(power,lowerBound) != 0 && power < 50) {
-			rightBasePower = 30;
+		if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
+			if(power > 0) {
+				rightBasePower = 30;
+			}
+			else if(power < 0) {
+				rightBasePower = -30;
+			}
 		}
 		leftBasePower = -rightBasePower;
 	}
@@ -801,10 +815,15 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
 	trgDegrees = degrees10 * 10;
 	int lowerBound = 15;
-	int power = 0.20 * (trgDegrees - newDegrees);
+	int power = 0.20 * (trgDegrees - SensorValue[in4]);
 	rightBasePower = power;
-	if(limiter(power,lowerBound) != 0 && power < 50) {
-		rightBasePower = 30;
+	if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
+		if(power > 0) {
+			rightBasePower = 30;
+		}
+		else if(power < 0) {
+			rightBasePower = -30;
+		}
 	}
 	leftBasePower = -rightBasePower;
 	while(limiter(rightBasePower,lowerBound) != 0 || limiter(leftBasePower,lowerBound) != 0) {
@@ -812,10 +831,15 @@ void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
 		motor[right2] = limiter(rightBasePower,lowerBound);
 		motor[left] = limiter(leftBasePower,lowerBound);
 		motor[left2] = limiter(leftBasePower,lowerBound);
-		power = 0.20 * (trgDegrees - newDegrees);
+		power = 0.20 * (trgDegrees - SensorValue[in4]);
 		rightBasePower = power;
-		if(limiter(power,lowerBound) != 0 && power < 50) {
-			rightBasePower = 30;
+		if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
+			if(power > 0) {
+				rightBasePower = 30;
+			}
+			else if(power < 0) {
+				rightBasePower = -30;
+			}
 		}
 		leftBasePower = -rightBasePower;
 	}
