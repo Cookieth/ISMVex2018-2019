@@ -174,7 +174,6 @@ task usercontrol()
 		ctrlMoveClaw();
 		ctrlMoveArm();
 		if(vexRT[Btn7U] == 1 && vexRT[Btn7UXmtr2] == 1) {
-			calibrateGyro();
 			nAutonomous();
 		}
 
@@ -237,24 +236,16 @@ task usercontrol()
 			motor[right2] = -threshold;
 		}
 		else if(vexRT[Btn7L] == 1) {
-			calibrateGyro();
-			moveAbsDegrees(90);
-			//ctrlMoveToDistance(70,70); //values haven't been tested
+			ctrlMoveToDistance(70,70); //values haven't been tested
 		}
 		else if(vexRT[Btn7R] == 1) {
-			calibrateGyro();
-			moveAbsDegrees(-15);
-			//ctrlMoveToDistance(160,160); //values haven't been tested
+			ctrlMoveToDistance(160,160); //values haven't been tested
 		}
 		else if(vexRT[Btn7LXmtr2] == 1) {
-			calibrateGyro();
-			moveRelDegrees(90);
-			//ctrlMoveToDistance(24,24);
+			ctrlMoveToDistance(24,24);
 		}
 		else if(vexRT[Btn7RXmtr2] == 1) {
-			calibrateGyro();
-			moveRelDegrees(-90);
-			//ctrlMoveToDistance(34,34);
+			ctrlMoveToDistance(34,34);
 		}
 		else{
 			motor[right] = 0;
@@ -656,24 +647,47 @@ void nAutonomous() {
 		r = -1;
  	}
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		moveDegrees(-15*r);
+		/*
+ 		moveInches(-6);
+		wait1Msec(0500);
+		autoMoveClaw(-130);
+		moveInches(6);
+		wait1Msec(0500);
+		*/
+ 		moveAbsDegrees(-12*r);
 		wait1Msec(1250);
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
-		moveDegrees(15*r);
 		moveInches(3);
-		moveDegrees(90*r);
 		toggleIntakeUp();						//Pick up ball
-		moveInches(-38);
+		moveAbsDegrees(80*r);
+		moveInches(-19);
+		moveAbsDegrees(80*r);
+		moveInches(-19);
+		moveAbsDegrees(90*r);
 		while(SensorValue[intakeLimit] != 1) {
-			//Do nothing
-		}
+				//Do nothing
+			}
 		toggleIntakeOff();
-		moveInches(38);
- 		//moveInches(52);							//Hit low flag
-		//moveInches(-40);
+		moveAbsDegrees(100*r);
+		moveInches(19);
+		moveAbsDegrees(90*r);
+		moveInches(24);
+		moveAbsDegrees(0);
+ 		moveInches(28);
+ 		moveAbsDegrees(0);
+ 		while(SensorValue[limitSwitch] == 1) { 	//Launch
+			motor[mangonel] = 127;
+		}
+		motor[mangonel] = 0;
+ 		moveInches(24);						//Hit low flag
+		moveInches(-24);
+		moveAbsDegrees(90*r);
+		toggleIntakeDown();
+		moveInches(-36);
+		moveInches(36);
 		/*
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-37);	//move back after hitting the low flag
@@ -723,38 +737,28 @@ void nAutonomous() {
 		*/
 	}
 	else { //BACK TILE AUTON
+		/*
 		autoMoveClaw(-130);
-		wait1Msec(1250);
-
+		moveAbsDegrees(-45*r);
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
-		while(SensorValue[limitSwitch] != 1) { 	//Pull back
-			motor[mangonel] = 127;
-		}
-		motor[mangonel] = 0;
 		autoMoveClaw(120);
-
-		moveDegrees(90*r);
-		toggleIntakeUp();						//Pick up ball
-		moveInches(-41);
-		while(SensorValue[intakeLimit] != 1) {
-			//Do nothing
-		}
-		toggleIntakeOff();
-		moveInches(12);
-		/*
-		toggleIntakeDown();
-		moveDegrees(-90*r);
-		moveInches(-18);
-		moveDegrees(85*r);
-		moveInches(12);
-		moveInches(-38);
-		toggleIntakeOff();
-		autoMoveClaw(-130);
-		moveInches(24);
 		*/
+		moveAbsDegrees(80*r);
+		moveInches(-19);
+		moveAbsDegrees(80*r);
+		moveInches(-19);
+		moveAbsDegrees(90*r);
+		while(SensorValue[intakeLimit] != 1) {
+				//Do nothing
+			}
+		toggleIntakeOff();
+		moveAbsDegrees(100*r);
+		moveInches(19);
+		moveAbsDegrees(90*r);
+		moveInches(24);
 	}
 	stopTask(moveAuton);
 }
@@ -775,10 +779,10 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 	rightBasePower = power;
 	if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
 		if(power > 0) {
-			rightBasePower = 30;
+			rightBasePower = 25;
 		}
 		else if(power < 0) {
-			rightBasePower = -30;
+			rightBasePower = -25;
 		}
 	}
 	leftBasePower = -rightBasePower;
@@ -798,10 +802,10 @@ void moveRelDegrees(int degrees10) { //Positive degrees turns clockwise
 		rightBasePower = power;
 		if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
 			if(power > 0) {
-				rightBasePower = 30;
+				rightBasePower = 25;
 			}
 			else if(power < 0) {
-				rightBasePower = -30;
+				rightBasePower = -25;
 			}
 		}
 		leftBasePower = -rightBasePower;
@@ -819,10 +823,10 @@ void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
 	rightBasePower = power;
 	if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
 		if(power > 0) {
-			rightBasePower = 30;
+			rightBasePower = 25;
 		}
 		else if(power < 0) {
-			rightBasePower = -30;
+			rightBasePower = -25;
 		}
 	}
 	leftBasePower = -rightBasePower;
@@ -835,10 +839,10 @@ void moveAbsDegrees(int degrees10) { //Positive degrees turns clockwise
 		rightBasePower = power;
 		if(limiter(power,lowerBound) != 0 && abs(power) < 60) {
 			if(power > 0) {
-				rightBasePower = 30;
+				rightBasePower = 25;
 			}
 			else if(power < 0) {
-				rightBasePower = -30;
+				rightBasePower = -25;
 			}
 		}
 		leftBasePower = -rightBasePower;
