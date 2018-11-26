@@ -239,7 +239,7 @@ task usercontrol()
 			ctrlMoveToDistance(70,70); //values haven't been tested
 		}
 		else if(vexRT[Btn7R] == 1) {
-			ctrlMoveToDistance(160,160); //values haven't been tested
+			ctrlMoveToDistance(117,117); //values haven't been tested
 		}
 		else if(vexRT[Btn7LXmtr2] == 1) {
 			ctrlMoveToDistance(24,24);
