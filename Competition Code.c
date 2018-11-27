@@ -647,13 +647,6 @@ void nAutonomous() {
 		r = -1;
  	}
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
-		/*
- 		moveInches(-6);
-		wait1Msec(0500);
-		autoMoveClaw(-130);
-		moveInches(6);
-		wait1Msec(0500);
-		*/
  		moveAbsDegrees(-12*r);
 		wait1Msec(1250);
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
@@ -664,7 +657,8 @@ void nAutonomous() {
 		toggleIntakeUp();						//Pick up ball
 		moveAbsDegrees(80*r);
 		moveInches(-19);
-		moveAbsDegrees(80*r);
+		wait1Msec(0500);
+		moveAbsDegrees(85*r);
 		moveInches(-19);
 		moveAbsDegrees(90*r);
 		while(SensorValue[intakeLimit] != 1) {
@@ -674,20 +668,24 @@ void nAutonomous() {
 		moveAbsDegrees(100*r);
 		moveInches(19);
 		moveAbsDegrees(90*r);
-		moveInches(24);
+		moveInches(25);
 		moveAbsDegrees(0);
  		moveInches(28);
+ 		toggleIntakeUp();						//Pick up ball
+ 		wait1Msec(3000);
+ 		toggleIntakeOff();
  		moveAbsDegrees(0);
  		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
- 		moveInches(24);						//Hit low flag
-		moveInches(-24);
+ 		moveInches(25);						//Hit low flag
+		moveInches(-25);
 		moveAbsDegrees(90*r);
 		toggleIntakeDown();
-		moveInches(-36);
-		moveInches(36);
+		moveInches(-30);
+		moveInches(10);
+		toggleIntakeOff();
 		/*
 		if(SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) { //SKILLS AUTON CONTINUATION
 			moveInches(-37);	//move back after hitting the low flag
