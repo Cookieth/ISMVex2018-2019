@@ -640,14 +640,16 @@ task moveAuton() {
 void nAutonomous() {
 	int r = 0;
 	startTask(moveAuton);
-	if(SensorValue[autonPot] < 2400) { //RED SIDE AUTON
+	if(SensorValue[autonPot] < 2400) { //BLUE SIDE AUTON
 		r = 1;
   	}
-  	else if(SensorValue[autonPot] > 2400) { //BLUE SIDE AUTON
+  	else if(SensorValue[autonPot] > 2400) { //RED SIDE AUTON
 		r = -1;
  	}
  	if((SensorValue[autonPot] < 800) || (SensorValue[autonPot] > 1600 && SensorValue[autonPot] < 2400) || (SensorValue[autonPot] > 3200)) { //FRONT TILE AUTON
- 		moveAbsDegrees(-12*r);
+ 		if(r == -1) {
+				moveAbsDegrees(-12*r);
+		}
 		wait1Msec(1250);
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
@@ -655,7 +657,12 @@ void nAutonomous() {
 		motor[mangonel] = 0;
 		moveInches(3);
 		toggleIntakeUp();						//Pick up ball
-		moveAbsDegrees(80*r);
+		if(r == -1) {
+			moveAbsDegrees(80*r);
+		}
+		else {
+			moveAbsDegrees(85*r);
+		}
 		moveInches(-19);
 		wait1Msec(0500);
 		moveAbsDegrees(85*r);
@@ -663,16 +670,16 @@ void nAutonomous() {
 		moveAbsDegrees(90*r);
 		while(SensorValue[intakeLimit] != 1) {
 				//Do nothing
-			}
+		}
 		toggleIntakeOff();
 		moveAbsDegrees(100*r);
-		moveInches(19);
+		moveInches(20);
 		moveAbsDegrees(90*r);
-		moveInches(25);
+		moveInches(26);
 		moveAbsDegrees(0);
  		moveInches(28);
- 		toggleIntakeUp();						//Pick up ball
- 		wait1Msec(3000);
+ 		toggleIntakeUp();						//Load ball
+ 		wait1Msec(3500);
  		toggleIntakeOff();
  		moveAbsDegrees(0);
  		while(SensorValue[limitSwitch] == 1) { 	//Launch
@@ -683,7 +690,7 @@ void nAutonomous() {
 		moveInches(-25);
 		moveAbsDegrees(90*r);
 		toggleIntakeDown();
-		moveInches(-30);
+		moveInches(-32);
 		moveInches(10);
 		toggleIntakeOff();
 		/*
