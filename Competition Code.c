@@ -722,49 +722,63 @@ void nAutonomous() {
 			motor[left] = 0;
 			motor[left2] = 0;
 			motor[arm] = 0;
-		}
-		else {									//NON SKILLS AUTON CONTINUATION
-			moveInches(-12);
-			autoMoveClaw(120);					//Retract forklift (can't do 130 because it gets stuck)
-			moveInches(-12);
-			moveDegrees(90*r);
-			toggleIntakeUp();						//Pick up ball
-			moveInches(-38);
-			while(SensorValue[intakeLimit] != 1) {
-				//Do nothing
-			}
-			toggleIntakeOff();
-			moveInches(14);
-			toggleIntakeUp();						//Load
-			wait1Msec(3000);
-			toggleIntakeOff();
-		}
-		*/
+		}*/
 	}
 	else { //BACK TILE AUTON
-		/*
-		autoMoveClaw(-130);
-		moveAbsDegrees(-45*r);
+		moveInches(-10);
+		moveAbsDegrees(-31*r);
+		wait1Msec(0250);
 		while(SensorValue[limitSwitch] == 1) { 	//Launch
 			motor[mangonel] = 127;
 		}
 		motor[mangonel] = 0;
-		autoMoveClaw(120);
-		*/
-		moveAbsDegrees(80*r);
-		moveInches(-19);
-		moveAbsDegrees(80*r);
-		moveInches(-19);
+		moveAbsDegrees(0);
+		moveInches(15);
+		toggleIntakeUp();						//Pick up ball
+		if(r == -1) {
+			moveAbsDegrees(80*r);
+		}
+		else {
+			moveAbsDegrees(85*r);
+		}
+		moveInches(-18);
+		wait1Msec(0500);
+		moveAbsDegrees(85*r);
+		moveInches(-18);
 		moveAbsDegrees(90*r);
-		toggleIntakeUp();
 		while(SensorValue[intakeLimit] != 1) {
 				//Do nothing
-			}
+		}
 		toggleIntakeOff();
-		moveAbsDegrees(100*r);
-		moveInches(19);
-		moveAbsDegrees(90*r);
-		moveInches(24);
+		moveInches(6);
+		moveAbsDegrees(0);
+		moveInches(-24);
+		
+		autoMoveClaw(-165);					//Retract forklift (can't do 130 because it gets stuck)
+		motor[arm] = 127;
+		wait1Msec(0450);
+		motor[arm] = 20;
+		
+		motor[right] = -127;
+		motor[right2] = -127;
+		motor[left] = -127;
+		motor[left2] = -127;
+		wait1Msec(0500);
+		motor[right] = 0;
+		motor[right2] = 0;
+		motor[left] = 0;
+		motor[left2] = 0;
+		
+		motor[right] = 127;					//Move to center platform
+		motor[right2] = 127;
+		motor[left] = 127;
+		motor[left2] = 127;
+		wait1Msec(2900);
+		motor[right] = 0;
+		motor[right2] = 0;
+		motor[left] = 0;
+		motor[left2] = 0;
+		motor[arm] = 0;
 	}
 	stopTask(moveAuton);
 }
